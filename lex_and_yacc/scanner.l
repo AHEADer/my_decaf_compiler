@@ -30,7 +30,7 @@ FLOAT                   (({DECIMAL}?\.{DIGIT}?((E|e)(\+|\-)?{DIGIT})?)|({DECIMAL
 IDEANTIFIER             ([_a-zA-Z][a-zA-Z0-9_]*)
 STRING                  (\"[^\"\n]*\")
 BOOLEAN                 (true|false)
-OPERATOR                ({ARITHMETIC}|RELATIONAL_OPERATOR)
+OPERATOR                ({ARITHMETIC}|{RELATIONAL_OPERATOR})
 PUNCTUATION             ([!,.[\]{}();])
 
 %%
@@ -112,6 +112,7 @@ ReadLine                { return T_ReadLine; }
                             return T_Identifier;
                         }
 
+.                       { return -1;}
 %%                                                                    
 
 
@@ -121,8 +122,12 @@ int main() {
         int i = yylex();
         if (i>255)    
             printf("%s\n",gTokenNames[i-256]);
-        else
+        else if (i!=-1)
             printf("%s\n",yytext);
+            else
+                printf("error char!\n");
+        
+        
     }
     return 0;
 }
