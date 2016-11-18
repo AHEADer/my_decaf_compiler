@@ -3,16 +3,16 @@
 
 #include "utilities.h"
 #include "scanner.h"
-#include "errors.h"
+
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
 
 YYSTYPE yylval;
-struct yyltype yylloc;
-static void DoBeforeEachAction();
 
-#define YY_USER_ACTION DoBeforeEachAction();
+
+
+
 #define TAB_SIZE 4
 
 int linenum, colno;
@@ -21,11 +21,12 @@ int linenum, colno;
 %x COMMENT              
 
 ARITHMETIC              ([-+*/%])
-DECIMAL                 (-?[0-9]+)
-HEX                     (-?0[xX][0-9a-fA-F]+)
+DECIMAL                 ((\+|\-)?[0-9]+)
+DIGIT                   ([0-9]+)
+HEX                     ((\+|\-)?0[xX][0-9a-fA-F]+)
 RELATIONAL_OPERATOR     ([=<>])
 INTEGER                 ({DECIMAL}|{HEX})
-FLOAT                   (-?{DECIMAL}\.{DECIMAL}?((E|e)(\+|\-)?{DECIMAL})?)
+FLOAT                   (({DECIMAL}?\.{DIGIT}?((E|e)(\+|\-)?{DIGIT})?)|({DECIMAL}(E|e)(\+|\-)?{DIGIT}))
 IDEANTIFIER             ([_a-zA-Z][a-zA-Z0-9_]*)
 STRING                  (\"[^\"\n]*\")
 BOOLEAN                 (true|false)
@@ -79,9 +80,9 @@ ReadLine                { return T_ReadLine; }
 
 {BOOLEAN}               {
                             if (strcmp(yytext,"true")==0)
-                                yylval.boolConstant = true;
+                                yylval.boolConstant = 1;
                             else
-                                yylval.boolConstant = false;
+                                yylval.boolConstant = 0;
                             return T_BoolConstant;
                         }
 
@@ -102,7 +103,8 @@ ReadLine                { return T_ReadLine; }
 
 {IDEANTIFIER}           {
                             if (strlen(yytext) > MaxIdentLen)
-                                ReportError::LongIdentifier(&yylloc, yytext);
+                                printf("errors");
+                                //(&yylloc, yytext);
                             
                             strncpy(yylval.identifier, yytext, MaxIdentLen);
                             yylval.identifier[MaxIdentLen] = '\0';
@@ -112,19 +114,15 @@ ReadLine                { return T_ReadLine; }
 
 %%                                                                    
 
-void InitScanner()
-{
-    PrintDebug("lex", "Initializing scanner");
-    //yy_flex_debug = true;
-    linenum = 1;
-    colno = 1;
-}
 
-static void DoBeforeEachAction()
-{
-  yylloc.first_line = yylloc.last_line = linenum;
 
-  yylloc.first_column = colno;
-  yylloc.last_column = colno + strlen(yytext) - 1;
-  colno = colno + strlen(yytext);
+int main() {
+    while(1) {
+        int i = yylex();
+        if (i>255)    
+            printf("%s\n",gTokenNames[i-256]);
+        else
+            printf("%s\n",yytext);
+    }
+    return 0;
 }

@@ -33,11 +33,11 @@ int IndexOf(const char *key) {
   return -1;
 }
 
-bool IsDebugOn(const char *key) {
+int IsDebugOn(const char *key) {
   return (IndexOf(key) != -1);
 }
 
-void SetDebugForKey(const char *key, bool value) {
+void SetDebugForKey(const char *key, int value) {
   int k = IndexOf(key);
   if (!value && k != -1)
     debugKeys.erase(debugKeys.begin() + k);

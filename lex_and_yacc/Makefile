@@ -11,7 +11,7 @@ PRODUCTS = $(COMPILER) $(PREPROCESSOR)
 default: $(PRODUCTS)
 
 # Set up the list of source and object files
-SRCS = errors.cc utilities.cc main.cc
+SRCS = errors.c utilities.c main.c
 
 # OBJS can deal with either .cc or .c files listed in SRCS
 OBJS = lex.yy.o $(patsubst %.cc, %.o, $(filter %.cc,$(SRCS))) $(patsubst %.c, %.o, $(filter %.c, $(SRCS)))
@@ -19,9 +19,9 @@ OBJS = lex.yy.o $(patsubst %.cc, %.o, $(filter %.cc,$(SRCS))) $(patsubst %.c, %.
 JUNK = *.log *~ *.o lex.yy.cc dpp.yy.c y.tab.c y.tab.h *.core core
 
 # Define the tools we are going to use
-CC = g++
-LD = g++
-LEX = flex++
+CC = gcc
+LD = gcc
+LEX = flex
 YACC = bison
 
 # Set up the necessary flags for the tools
@@ -46,14 +46,14 @@ LIBS = -lc -lm -lfl
 
 # Rules for various parts of the target
 
-.yy.o: $*.yy.cc
-	$(CC) $(CFLAGS) -c -o $@ $*.cc
+.yy.o: $*.yy.c
+	$(CC) $(CFLAGS) -c -o $@ $*.c
 
 lex.yy.cc: scanner.l 
 	$(LEX) $(LEXFLAGS) scanner.l
 
-.cc.o: $*.cc
-	$(CC) $(CFLAGS) -c -o $@ $*.cc
+.cc.o: $*.c
+	$(CC) $(CFLAGS) -c -o $@ $*.c
 
 # rules to build compiler (dcc)
 

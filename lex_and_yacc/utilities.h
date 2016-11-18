@@ -61,7 +61,7 @@ void PrintDebug(const char *key, const char *format, ...);
  * be called from the provided main for flags passed with -d.
  */
 
-void SetDebugForKey(const char *key, bool val);
+void SetDebugForKey(const char *key, int val);
 
 /**
  * Function: IsDebugOn()
@@ -71,7 +71,7 @@ void SetDebugForKey(const char *key, bool val);
  * for debug printing.
  */
 
-bool IsDebugOn(const char *key);
+int IsDebugOn(const char *key);
 
 /**
  * Function: ParseCommandLine

@@ -56,7 +56,7 @@ static const char *gTokenNames[T_NumTokenTypes] = {
  */
 typedef union {
     int integerConstant;
-    bool boolConstant;
+    int boolConstant;
     char *stringConstant;
     double doubleConstant;
     char identifier[MaxIdentLen+1]; // +1 for terminating null
@@ -71,11 +71,14 @@ typedef union {
  */
 extern YYSTYPE yylval;
 
-extern char *yytext;      // Text of lexeme just scanned
+char *yytext;      // Text of lexeme just scanned
 
 
 int yylex();              // Defined in the generated lex.yy.c file
 
 void InitScanner();                 // Defined in scanner.l user subroutines
- 
+
+
+
+
 #endif
