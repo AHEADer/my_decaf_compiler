@@ -65,8 +65,90 @@
 %token <doubleVal>  DOUBLE    "double"
 %token <stringVal>  STRING    "string"
 
+/*dcc tokens*/
+%token   T_Void T_Bool T_Int T_Double T_String T_Class
+%token   T_LessEqual T_GreaterEqual T_Equal T_NotEqual T_Dims T_Increment T_Decrement
+%token   T_And T_Or T_Null T_Extends T_This T_Interface T_Implements
+%token   T_While T_For T_If T_Else T_Return T_Break T_Switch T_Case T_Default
+%token   T_New T_NewArray T_Print T_ReadInteger T_ReadLine
+
+%token   <identifier> T_Identifier
+%token   <stringVal>  T_StringConstant
+%token   <integerVal> T_IntConstant
+%token   <doubleVal>  T_DoubleConstant
+%token   <boolVal>    T_BoolConstant
+
+
+
 %type <calcnode>  constant variable
 %type <calcnode>  atomexpr powexpr unaryexpr mulexpr addexpr expr
+
+/* Non-terminal types
+ * ------------------
+ * In order for yacc to assign/access the correct field of $$, $1, we
+ * must to declare which field is appropriate for the non-terminal.
+ * As an example, this first type declaration establishes that the DeclList
+ * non-terminal uses the field named "declList" in the yylval union. This
+ * means that when we are setting $$ for a reduction for DeclList or reading
+ * $n which corresponds to a DeclList nonterminal we are accessing the field
+ * of the union named "declList" which is of type List<Decl*>.
+ */
+%type <program>       Program
+%type <declList>      DeclList
+%type <decl>          Decl
+%type <vardecl>       VarDecl
+%type <fndecl>        FnDecl
+%type <classdecl>     ClassDecl
+%type <interfacedecl> InterfaceDecl
+%type <simpletype>    Type
+%type <namedtype>     NamedType
+%type <arraytype>     ArrayType
+%type <vardecls>      Formals
+%type <vardecls>      Variables
+%type <implements>    Implements
+%type <implements>    Impl
+%type <namedtype>     Extend
+%type <decl>          Field
+%type <declList>      Fields
+%type <decl>          Prototype
+%type <declList>      Prototypes
+%type <vardecls>      VarDecls
+%type <stmt>          Stmt
+%type <stmts>         Stmts
+%type <stmtblock>     StmtBlock
+%type <ifstmt>        IfStmt
+%type <whilestmt>     WhileStmt
+%type <forstmt>       ForStmt
+%type <rtnstmt>       ReturnStmt
+%type <brkstmt>       BreakStmt
+%type <switchstmt>    SwitchStmt
+%type <casestmts>     Cases
+%type <casestmt>      Case
+%type <defaultstmt>   Default
+%type <pntstmt>   PrintStmt
+%type <expr>          Expr
+%type <expr>          OptExpr
+%type <exprs>         Exprs
+%type <exprs>       Actuals
+%type <expr>        Constant
+%type <intconst>      IntConstant 
+%type <boolconst>     BoolConstant
+%type <stringconst>   StringConstant
+%type <doubleconst>   DoubleConstant
+%type <nullconst>     NullConstant
+%type <call>          Call
+%type <arithmeticexpr> ArithmeticExpr
+%type <relationalexpr> RelationalExpr
+%type <equalityexpr>   EqualityExpr
+%type <logicalexpr>    LogicalExpr
+%type <assignexpr>     AssignExpr
+%type <postfixexpr>    PostfixExpr
+%type <lvalue>        LValue
+%type <fieldaccess>   FieldAccess
+%type <arrayaccess>   ArrayAccess
+
+
+
 
 %destructor { delete $$; } STRING
 %destructor { delete $$; } constant variable
