@@ -1,5 +1,5 @@
 // $Id: driver.h 17 2007-08-19 18:51:39Z tb $ 	
-/** \file driver.h Declaration of the example::Driver class. */
+/** \file driver.h Declaration of the dcc::Driver class. */
 
 #ifndef EXAMPLE_DRIVER_H
 #define EXAMPLE_DRIVER_H
@@ -10,9 +10,9 @@
 // forward declaration
 class CalcContext;
 
-/** The example namespace is used to encapsulate the three parser classes
- * example::Parser, example::Scanner and example::Driver */
-namespace example {
+/** The dcc namespace is used to encapsulate the three parser classes
+ * dcc::Parser, dcc::Scanner and dcc::Driver */
+namespace dcc {
 
 /** The Driver class brings together all components. It creates an instance of
  * the Parser and Scanner classes and connects them. Then the input stream is
@@ -79,6 +79,6 @@ public:
     class CalcContext& calc;
 };
 
-} // namespace example
+} // namespace dcc
 
 #endif // EXAMPLE_DRIVER_H
