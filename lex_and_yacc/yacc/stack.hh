@@ -32,16 +32,16 @@
 
 /**
  ** \file stack.hh
- ** Define the yy::stack class.
+ ** Define the dcc::stack class.
  */
 
-#ifndef YY_YY_STACK_HH_INCLUDED
-# define YY_YY_STACK_HH_INCLUDED
+#ifndef YY_DCC_STACK_HH_INCLUDED
+# define YY_DCC_STACK_HH_INCLUDED
 
 # include <vector>
 
 
-namespace yy {
+namespace dcc {
 #line 46 "stack.hh" // stack.hh:132
   template <class T, class S = std::vector<T> >
   class stack
@@ -151,7 +151,7 @@ namespace yy {
   };
 
 
-} // yy
+} // dcc
 #line 156 "stack.hh" // stack.hh:132
 
-#endif // !YY_YY_STACK_HH_INCLUDED
+#endif // !YY_DCC_STACK_HH_INCLUDED

@@ -19,6 +19,7 @@
  * versions. */
 %debug
 
+%name-prefix="dcc"
 /* start symbol is named "start" */
 //%start start
 

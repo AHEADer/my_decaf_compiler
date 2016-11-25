@@ -32,13 +32,13 @@
 
 /**
  ** \file parser.hh
- ** Define the yy::parser class.
+ ** Define the dcc::parser class.
  */
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
 
-#ifndef YY_YY_PARSER_HH_INCLUDED
-# define YY_YY_PARSER_HH_INCLUDED
+#ifndef YY_DCC_PARSER_HH_INCLUDED
+# define YY_DCC_PARSER_HH_INCLUDED
 
 
 # include <cstdlib> // std::abort
@@ -109,7 +109,7 @@
 #endif
 
 
-namespace yy {
+namespace dcc {
 #line 114 "parser.hh" // lalr1.cc:377
 
 
@@ -124,7 +124,7 @@ namespace yy {
     /// Symbol semantic values.
     union semantic_type
     {
-    #line 52 "parser.yy" // lalr1.cc:377
+    #line 53 "parser.yy" // lalr1.cc:377
 
     int       integerVal;
     double      doubleVal;
@@ -518,10 +518,10 @@ namespace yy {
 
 
 
-} // yy
+} // dcc
 #line 523 "parser.hh" // lalr1.cc:377
 
 
 
 
-#endif // !YY_YY_PARSER_HH_INCLUDED
+#endif // !YY_DCC_PARSER_HH_INCLUDED

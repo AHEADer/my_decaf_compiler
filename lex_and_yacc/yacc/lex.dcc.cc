@@ -613,14 +613,14 @@ static yyconst flex_int16_t yy_rule_linenum[42] =
 //#include <ctype.h>
 #include <stdlib.h>
 
-YYSTYPE yylval;
+//YYSTYPE yylval;
 
 typedef dcc::Parser::token token;
 typedef dcc::Parser::token_type token_type;
 
 #define yyterminate() return token::END
 #define YY_NO_UNISTD_H
-
+#define MaxIdentLen 31
 #define TAB_SIZE 4
 
 int linenum, colno;
@@ -923,161 +923,161 @@ YY_RULE_SETUP
 case 4:
 YY_RULE_SETUP
 #line 61 "scanner.ll"
-{ return T_Void; }
+{ return token::T_Void; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
 #line 62 "scanner.ll"
-{ return T_Int; }
+{ return token::T_Int; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
 #line 63 "scanner.ll"
-{ return T_Double; }
+{ return token::T_Double; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
 #line 64 "scanner.ll"
-{ return T_Bool; }
+{ return token::T_Bool; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
 #line 65 "scanner.ll"
-{ return T_String; }
+{ return token::T_String; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 66 "scanner.ll"
-{ return T_Class; }
+{ return token::T_Class; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 67 "scanner.ll"
-{ return T_Interface; }
+{ return token::T_Interface; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 68 "scanner.ll"
-{ return T_Null; }
+{ return token::T_Null; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 69 "scanner.ll"
-{ return T_This; }
+{ return token::T_This; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 70 "scanner.ll"
-{ return T_Extends; }
+{ return token::T_Extends; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 71 "scanner.ll"
-{ return T_Implements; }
+{ return token::T_Implements; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 72 "scanner.ll"
-{ return T_For; }
+{ return token::T_For; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 73 "scanner.ll"
-{ return T_While; }
+{ return token::T_While; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 74 "scanner.ll"
-{ return T_If; }
+{ return token::T_If; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 75 "scanner.ll"
-{ return T_Else; }
+{ return token::T_Else; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 76 "scanner.ll"
-{ return T_Return; }
+{ return token::T_Return; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 77 "scanner.ll"
-{ return T_Break; }
+{ return token::T_Break; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
 #line 78 "scanner.ll"
-{ return T_New; }
+{ return token::T_New; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 79 "scanner.ll"
-{ return T_NewArray; }
+{ return token::T_NewArray; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
 #line 80 "scanner.ll"
-{ return T_Print; }
+{ return token::T_Print; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
 #line 81 "scanner.ll"
-{ return T_ReadInteger; }
+{ return token::T_ReadInteger; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
 #line 82 "scanner.ll"
-{ return T_ReadLine; }
+{ return token::T_ReadLine; }
 	YY_BREAK
 case 26:
 #line 85 "scanner.ll"
 case 27:
 YY_RULE_SETUP
 #line 85 "scanner.ll"
-{return yytext[0];}
+{return static_cast<token_type>(*yytext);}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
 #line 87 "scanner.ll"
-{ return T_LessEqual; }
+{ return token::T_LessEqual; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
 #line 88 "scanner.ll"
-{ return T_GreaterEqual; }
+{ return token::T_GreaterEqual; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
 #line 89 "scanner.ll"
-{ return T_Equal; }
+{ return token::T_Equal; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
 #line 90 "scanner.ll"
-{ return T_NotEqual; }
+{ return token::T_NotEqual; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
 #line 91 "scanner.ll"
-{ return T_Dims; }
+{ return token::T_Dims; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
 #line 92 "scanner.ll"
-{ return T_And; }
+{ return token::T_And; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
 #line 93 "scanner.ll"
-{ return T_Or; } 
+{ return token::T_Or; } 
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
 #line 95 "scanner.ll"
 {
                             yylval->stringVal = new std::string(yytext, yyleng);
-                            return T_StringConstant;
+                            return token::T_StringConstant;
                         }
 	YY_BREAK
 case 36:
@@ -1088,7 +1088,7 @@ YY_RULE_SETUP
                                 yylval->boolVal = true;
                             else
                                 yylval->boolVal = false;
-                            return T_BoolConstant;
+                            return token::T_BoolConstant;
                         }
 	YY_BREAK
 case 37:
@@ -1096,7 +1096,7 @@ YY_RULE_SETUP
 #line 108 "scanner.ll"
 {
                             yylval->integerVal = strtol(yytext, NULL, 10);
-                            return T_IntConstant;
+                            return token::T_IntConstant;
                         } 
 	YY_BREAK
 case 38:
@@ -1104,7 +1104,7 @@ YY_RULE_SETUP
 #line 113 "scanner.ll"
 {
                             yylval->integerVal = strtol(yytext, NULL, 16);
-                            return T_IntConstant;
+                            return token::T_IntConstant;
                         }
 	YY_BREAK
 case 39:
@@ -1112,7 +1112,7 @@ YY_RULE_SETUP
 #line 118 "scanner.ll"
 {
                             yylval->doubleVal = atof(yytext);
-                            return T_DoubleConstant;
+                            return token::T_DoubleConstant;
                         }
 	YY_BREAK
 case 40:
@@ -1126,13 +1126,13 @@ YY_RULE_SETUP
                             strncpy(yylval->identifier, yytext, MaxIdentLen);
                             yylval->identifier[MaxIdentLen] = '\0';
                             
-                            return T_Identifier;
+                            return token::T_Identifier;
                         }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
 #line 134 "scanner.ll"
-{ return -1;}
+{ return static_cast<token_type>(*yytext);}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
