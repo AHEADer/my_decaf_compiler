@@ -22,7 +22,7 @@
 #undef yyFlexLexer
 #endif
 
-#include "parser.tab.hh"
+#include "parser.hh"
 
 typedef enum { 
     T_Void = 256,

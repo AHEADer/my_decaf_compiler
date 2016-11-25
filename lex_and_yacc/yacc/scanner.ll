@@ -1,11 +1,11 @@
 %{
 
 //#include "utilities.h"
-//#include "scanner.h"
+#include "scanner.h"
 
 #include <string.h>
 //#include <ctype.h>
-//#include <stdlib.h>
+#include <stdlib.h>
 
 YYSTYPE yylval;
 

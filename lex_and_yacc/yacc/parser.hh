@@ -31,14 +31,14 @@
 // version 2.2 of Bison.
 
 /**
- ** \file parser.tab.hh
+ ** \file parser.hh
  ** Define the yy::parser class.
  */
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
 
-#ifndef YY_YY_PARSER_TAB_HH_INCLUDED
-# define YY_YY_PARSER_TAB_HH_INCLUDED
+#ifndef YY_YY_PARSER_HH_INCLUDED
+# define YY_YY_PARSER_HH_INCLUDED
 
 
 # include <cstdlib> // std::abort
@@ -110,30 +110,30 @@
 
 
 namespace yy {
-#line 114 "parser.tab.hh" // lalr1.cc:377
+#line 114 "parser.hh" // lalr1.cc:377
 
 
 
 
 
   /// A Bison parser.
-  class "Parser"
+  class Parser
   {
   public:
 #ifndef YYSTYPE
     /// Symbol semantic values.
     union semantic_type
     {
-    #line 53 "parser.yy" // lalr1.cc:377
+    #line 52 "parser.yy" // lalr1.cc:377
 
     int       integerVal;
     double      doubleVal;
     std::string*    stringVal;
     bool boolVal;
-    char identifier[MaxIdentLen+1];
-    class CalcNode*   calcnode;
+    char identifier[32];
+    //class CalcNode*   calcnode;
 
-#line 137 "parser.tab.hh" // lalr1.cc:377
+#line 137 "parser.hh" // lalr1.cc:377
     };
 #else
     typedef YYSTYPE semantic_type;
@@ -155,9 +155,47 @@ namespace yy {
       {
         END = 0,
         EOL = 258,
-        INTEGER = 259,
-        DOUBLE = 260,
-        STRING = 261
+        T_Void = 259,
+        T_Bool = 260,
+        T_Int = 261,
+        T_Double = 262,
+        T_String = 263,
+        T_Class = 264,
+        T_LessEqual = 265,
+        T_GreaterEqual = 266,
+        T_Equal = 267,
+        T_NotEqual = 268,
+        T_Dims = 269,
+        T_Increment = 270,
+        T_Decrement = 271,
+        T_And = 272,
+        T_Or = 273,
+        T_Null = 274,
+        T_Extends = 275,
+        T_This = 276,
+        T_Interface = 277,
+        T_Implements = 278,
+        T_While = 279,
+        T_For = 280,
+        T_If = 281,
+        T_Else = 282,
+        T_Return = 283,
+        T_Break = 284,
+        T_Switch = 285,
+        T_Case = 286,
+        T_Default = 287,
+        T_New = 288,
+        T_NewArray = 289,
+        T_Print = 290,
+        T_ReadInteger = 291,
+        T_ReadLine = 292,
+        T_Identifier = 293,
+        T_StringConstant = 294,
+        T_IntConstant = 295,
+        T_DoubleConstant = 296,
+        T_BoolConstant = 297,
+        LOWER_THAN_ELSE = 298,
+        UMINUS = 299
       };
     };
 
@@ -262,8 +300,8 @@ namespace yy {
 
 
     /// Build a parser object.
-    "Parser" (class Driver& driver_yyarg);
-    virtual ~"Parser" ();
+    Parser (class Driver& driver_yyarg);
+    virtual ~Parser ();
 
     /// Parse.
     /// \returns  0 iff parsing succeeded.
@@ -293,8 +331,8 @@ namespace yy {
 
   private:
     /// This class is not copyable.
-    "Parser" (const "Parser"&);
-    "Parser"& operator= (const "Parser"&);
+    Parser (const Parser&);
+    Parser& operator= (const Parser&);
 
     /// State numbers.
     typedef int state_type;
@@ -327,7 +365,7 @@ namespace yy {
     // Tables.
   // YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
   // STATE-NUM.
-  static const signed char yypact_[];
+  static const short int yypact_[];
 
   // YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
   // Performed when YYTABLE does not specify something else to do.  Zero
@@ -335,17 +373,17 @@ namespace yy {
   static const unsigned char yydefact_[];
 
   // YYPGOTO[NTERM-NUM].
-  static const signed char yypgoto_[];
+  static const short int yypgoto_[];
 
   // YYDEFGOTO[NTERM-NUM].
-  static const signed char yydefgoto_[];
+  static const short int yydefgoto_[];
 
   // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
   // positive, shift that token.  If negative, reduce the rule whose
   // number is the opposite.  If YYTABLE_NINF, syntax error.
-  static const unsigned char yytable_[];
+  static const short int yytable_[];
 
-  static const unsigned char yycheck_[];
+  static const short int yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -366,7 +404,7 @@ namespace yy {
     static const char* const yytname_[];
 #if YYDEBUG
   // YYRLINE[YYN] -- Source line where rule number YYN was defined.
-  static const unsigned char yyrline_[];
+  static const unsigned short int yyrline_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.
     virtual void yy_reduce_print_ (int r);
     /// Print the state stack on the debug stream.
@@ -465,12 +503,12 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 42,     ///< Last index in yytable_.
-      yynnts_ = 11,  ///< Number of nonterminal symbols.
-      yyfinal_ = 2, ///< Termination state number.
+      yylast_ = 523,     ///< Last index in yytable_.
+      yynnts_ = 54,  ///< Number of nonterminal symbols.
+      yyfinal_ = 22, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 17  ///< Number of tokens.
+      yyntokens_ = 64  ///< Number of tokens.
     };
 
 
@@ -481,9 +519,9 @@ namespace yy {
 
 
 } // yy
-#line 485 "parser.tab.hh" // lalr1.cc:377
+#line 523 "parser.hh" // lalr1.cc:377
 
 
 
 
-#endif // !YY_YY_PARSER_TAB_HH_INCLUDED
+#endif // !YY_YY_PARSER_HH_INCLUDED

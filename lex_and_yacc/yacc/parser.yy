@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
-
+//#include "scanner.h"
 #include "expression.h"
 
 #define MaxIdentLen 31
@@ -20,7 +20,7 @@
 %debug
 
 /* start symbol is named "start" */
-%start start
+//%start start
 
 /* write out a header file containing the token defines */
 %defines
@@ -30,7 +30,7 @@
 
 
 /* set the parser's class identifier */
-%define "parser_class_name" {"Parser"}
+%define "parser_class_name" "Parser"
 
 /* keep track of the current position within the input */
 %locations
@@ -49,21 +49,17 @@
 %error-verbose
 
  /*** BEGIN dcc - Change the dcc grammar's tokens below ***/
-
 %union {
     int       integerVal;
     double      doubleVal;
     std::string*    stringVal;
     bool boolVal;
-    char identifier[MaxIdentLen+1];
-    class CalcNode*   calcnode;
+    char identifier[32];
+    //class CalcNode*   calcnode;
 }
 
 %token      END      0  "end of file"
 %token      EOL   "end of line"
-%token <integerVal> INTEGER   "integer"
-%token <doubleVal>  DOUBLE    "double"
-%token <stringVal>  STRING    "string"
 
 /*dcc tokens*/
 %token   T_Void T_Bool T_Int T_Double T_String T_Class
@@ -78,10 +74,6 @@
 %token   <doubleVal>  T_DoubleConstant
 %token   <boolVal>    T_BoolConstant
 
-
-
-%type <calcnode>  constant variable
-%type <calcnode>  atomexpr powexpr unaryexpr mulexpr addexpr expr
 
 /* Non-terminal types
  * ------------------
@@ -125,12 +117,12 @@
 %type <casestmts>     Cases
 %type <casestmt>      Case
 %type <defaultstmt>   Default
-%type <pntstmt>   PrintStmt
+%type <pntstmt>       PrintStmt
 %type <expr>          Expr
 %type <expr>          OptExpr
 %type <exprs>         Exprs
-%type <exprs>       Actuals
-%type <expr>        Constant
+%type <exprs>         Actuals
+%type <expr>          Constant
 %type <intconst>      IntConstant 
 %type <boolconst>     BoolConstant
 %type <stringconst>   StringConstant
@@ -146,13 +138,6 @@
 %type <lvalue>        LValue
 %type <fieldaccess>   FieldAccess
 %type <arrayaccess>   ArrayAccess
-
-
-
-
-%destructor { delete $$; } STRING
-%destructor { delete $$; } constant variable
-%destructor { delete $$; } atomexpr powexpr unaryexpr mulexpr addexpr expr
 
  /*** END dcc - Change the dcc grammar's tokens above ***/
 
@@ -173,126 +158,279 @@
 
  /*** BEGIN dcc - Change the dcc grammar rules below ***/
 
-constant : INTEGER
-           {
-         $$ = new CNConstant($1);
-     }
-         | DOUBLE
-           {
-         $$ = new CNConstant($1);
-     }
+Program   :    DeclList              {
+                                      @1;
+                                      /* pp2: The @1 is needed to convince
+                                       * yacc to set up yylloc. You can remove
+                                       * it once you have other uses of @n*/
+                                      $$ = NULL;
+                                     }
+          ;
 
-variable : STRING
-           {
-         if (!driver.calc.existsVariable(*$1)) {
-       error(yyloc, std::string("Unknown variable \"") + *$1 + "\"");
-       delete $1;
-       YYERROR;
-         }
-         else {
-       $$ = new CNConstant( driver.calc.getVariable(*$1) );
-       delete $1;
-         }
-     }
+DeclList  :    DeclList Decl         { $$ = NULL; }
+          |    Decl                  { $$ = NULL; }
+          ;
 
-atomexpr : constant
-           {
-         $$ = $1;
-     }
-         | variable
-           {
-         $$ = $1;
-     }
-         | '(' expr ')'
-           {
-         $$ = $2;
-     }
+Decl      :    VarDecl              
+          |    FnDecl                  
+          |    ClassDecl
+          |    InterfaceDecl
+          ;
+          
+VarDecl   :    Type T_Identifier ';' { $$ = $$ = NULL; }     
+          ;
+        
+Type      :    T_Int                 { $$ = NULL; }
+          |    T_Double              { $$ = NULL; }
+          |    T_Bool                { $$ = NULL; }
+          |    T_String              { $$ = NULL; }
+          |    NamedType
+          |    ArrayType
+          ;
 
-powexpr : atomexpr
-          {
-        $$ = $1;
-    }
-        | atomexpr '^' powexpr
-          {
-        $$ = new CNPower($1, $3);
-    }
+NamedType :    T_Identifier          { $$ = NULL; }             
+          ;
 
-unaryexpr : powexpr
-            {
-    $$ = $1;
-      }
-          | '+' powexpr
-            {
-    $$ = $2;
-      }
-          | '-' powexpr
-            {
-    $$ = new CNNegate($2);
-      }
+ArrayType :    Type T_Dims           { $$ = NULL; }
+          ;
 
-mulexpr : unaryexpr
-          {
-        $$ = $1;
-    }
-        | mulexpr '*' unaryexpr
-          {
-        $$ = new CNMultiply($1, $3);
-    }
-        | mulexpr '/' unaryexpr
-          {
-        $$ = new CNDivide($1, $3);
-    }
-        | mulexpr '%' unaryexpr
-          {
-        $$ = new CNModulo($1, $3);
-    }
+FnDecl    :    Type T_Identifier '(' Formals ')' StmtBlock
+                                     { $$ = NULL; }
+          |    T_Void T_Identifier '(' Formals ')' StmtBlock
+                                     { $$ = NULL; }
+          ;
 
-addexpr : mulexpr
-          {
-        $$ = $1;
-    }
-        | addexpr '+' mulexpr
-          {
-        $$ = new CNAdd($1, $3);
-    }
-        | addexpr '-' mulexpr
-          {
-        $$ = new CNSubtract($1, $3);
-    }
+Formals   :    Variables  
+          |                          { $$ = NULL; }
+          ;
+          
+Variables :    Variables ',' Type T_Identifier
+                                     { $$ = NULL; }
+          |     Type T_Identifier    { $$ = NULL; }
+          ;
+          
+ClassDecl :    T_Class T_Identifier Extend Impl '{' Fields '}'              
+                                     { $$ = NULL; }
+          |    T_Class T_Identifier Extend Impl '{' '}'
+                                     { $$ = NULL; }                           
+          ;
 
-expr  : addexpr
-          {
-        $$ = $1;
-    }
+Extend    :    T_Extends NamedType
+                                     { $$ = NULL; }
+          |                          { $$ = NULL; }          
+          ;
+          
+Impl      :    T_Implements Implements 
+                                     { $$ = NULL; }
+          |                          { $$ = NULL; }
+          ;
+              
+Implements :   Implements ',' NamedType 
+                                     { $$ = NULL; }
+           |   NamedType             { $$ = NULL; }
+           ;                      
 
-assignment : STRING '=' expr
-             {
-     driver.calc.variables[*$1] = $3->evaluate();
-     std::cout << "Setting variable " << *$1
-         << " = " << driver.calc.variables[*$1] << "\n";
-     delete $1;
-     delete $3;
-       }
+Fields     :   Fields Field          { $$ = NULL; }
+           |   Field                 { $$ = NULL; }
+           ;  
 
-start : /* empty */
-        | start ';'
-        | start EOL
-  | start assignment ';'
-  | start assignment EOL
-  | start assignment END
-        | start expr ';'
-          {
-        driver.calc.expressions.push_back($2);
-    }
-        | start expr EOL
-          {
-        driver.calc.expressions.push_back($2);
-    }
-        | start expr END
-          {
-        driver.calc.expressions.push_back($2);
-    }
+Field      :   VarDecl 
+           |   FnDecl
+           ;
+           
+InterfaceDecl : T_Interface T_Identifier '{' Prototypes '}'
+                                     { $$ = NULL; }
+              | T_Interface T_Identifier '{' '}'
+                                     { $$ = NULL; }
+              ;
+              
+Prototypes : Prototypes Prototype    { $$ = NULL; }
+           | Prototype               { $$ = NULL; }
+           ;
+            
+Prototype  : Type T_Identifier '(' Formals ')' ';'
+                                     { $$ = NULL; }
+           | T_Void T_Identifier '(' Formals ')' ';'
+                                     { $$ = NULL; }
+           ;                
+           
+StmtBlock  : '{' VarDecls Stmts '}'  { $$ = NULL; }
+           | '{' VarDecls '}'        { $$ = NULL; }
+           ;
+           
+VarDecls   : VarDecls VarDecl        { $$ = NULL;    }
+           |                         { $$ = NULL;  }
+           ;
 
+Stmts      : Stmts Stmt              { $$ = NULL; }
+           | Stmt                    { $$ = NULL;  }
+           ;
+           
+Stmt       : OptExpr ';'  
+           | IfStmt
+           | WhileStmt
+           | ForStmt
+           | BreakStmt
+           | ReturnStmt
+           | SwitchStmt
+           | PrintStmt
+           | StmtBlock
+           ;
+          
+           
+IfStmt     : T_If '(' Expr ')' Stmt  %prec LOWER_THAN_ELSE
+                                     { $$ = NULL; }
+           | T_If '(' Expr ')' Stmt T_Else Stmt
+                                     { $$ = NULL; }
+           ;
+                                     
+           
+WhileStmt  : T_While '(' Expr ')' Stmt
+                                     { $$ = NULL; }
+           ;
+           
+ForStmt    : T_For '(' OptExpr ';' Expr ';' OptExpr ')' Stmt
+                                     { $$ = NULL; }
+           ;
+           
+ReturnStmt : T_Return OptExpr ';'    { $$ = NULL; }
+           ;
+        
+BreakStmt  : T_Break ';'             { $$ = NULL; }                            
+           ;
+           
+SwitchStmt : T_Switch '(' Expr ')' '{' Cases Default '}'
+                                     { $$ = NULL; }
+           ;
+
+Cases      : Cases Case              { $$ = NULL; }
+           | Case                    { $$ = NULL; }
+           ;
+
+Case       : T_Case IntConstant ':' Stmts        
+                                     { $$ = NULL; }
+           | T_Case IntConstant ':'  { $$ = NULL; }
+           ;
+           
+Default    : T_Default ':' Stmts     { $$ = NULL; }
+           |                         { $$ = NULL; }
+           ;
+
+PrintStmt  : T_Print '(' Exprs ')' ';' 
+                                     { $$ = NULL; }
+           ;
+           
+Expr       :  AssignExpr          
+           |  Constant
+           |  LValue
+           |  T_This                 { $$ = NULL; }
+           |  Call
+           |  '(' Expr ')'           { $$ = NULL; }
+           |  ArithmeticExpr
+           |  EqualityExpr
+           |  RelationalExpr
+           |  LogicalExpr
+           |  PostfixExpr
+         |  T_ReadInteger '(' ')'  { $$ = NULL; }
+           |  T_ReadLine '(' ')'     { $$ = NULL; }
+           |  T_New T_Identifier     { $$ = NULL; }
+           |  T_NewArray '(' Expr ',' Type ')'
+                                     { $$ = NULL; }
+           ;
+
+AssignExpr     : LValue '=' Expr     
+                                     { $$ = NULL; } 
+               ;
+   
+ArithmeticExpr : Expr '+' Expr       { $$ = NULL; }
+               | Expr '-' Expr       { $$ = NULL; } 
+               | Expr '*' Expr       { $$ = NULL; }
+               | Expr '/' Expr       { $$ = NULL; }
+               | Expr '%' Expr       { $$ = NULL; }
+               | '-' Expr %prec UMINUS
+                                     { $$ = NULL; }
+               ;
+
+PostfixExpr    : LValue T_Increment  { $$ = NULL; }
+               | LValue T_Decrement  { $$ = NULL; }
+               ;
+               
+EqualityExpr   : Expr T_Equal Expr   
+                                     { $$ = NULL; }
+               | Expr T_NotEqual Expr
+                                     { $$ = NULL; }                        
+               ;
+                                            
+RelationalExpr : Expr '<' Expr
+                                     { $$ = NULL; }
+               | Expr '>' Expr
+                                     { $$ = NULL; } 
+               | Expr T_LessEqual Expr 
+                                     { $$ = NULL; }                     
+               | Expr T_GreaterEqual Expr 
+                                     { $$ = NULL; } 
+               ;
+
+LogicalExpr    : Expr T_And Expr 
+                                     { $$ = NULL; }
+               | Expr T_Or Expr 
+                                     { $$ = NULL; }
+               | '!' Expr            { $$ = NULL; }
+               ;               
+
+
+Exprs      : Exprs ',' Expr          { $$ = NULL; }
+           | Expr                    { $$ = NULL; }
+           ; 
+
+OptExpr    : Expr
+           |                         { $$ = NULL; }
+           ;
+ 
+            
+LValue     : FieldAccess             
+           | ArrayAccess 
+           ; 
+
+FieldAccess : T_Identifier           { $$ = NULL; }
+            | Expr '.' T_Identifier
+                                     { $$ = NULL; }
+            ;
+
+Call       : T_Identifier '(' Actuals ')' 
+                                     { $$ = NULL; }  
+           | Expr '.' T_Identifier '(' Actuals ')'
+                                     { $$ = NULL; }
+           ;
+
+ArrayAccess : Expr '[' Expr ']'      { $$ = NULL; }
+            ;
+           
+Actuals    : Exprs 
+           |                         { $$ = NULL; }
+           ;
+           
+Constant   : IntConstant            
+           | DoubleConstant
+           | BoolConstant
+           | StringConstant
+           | NullConstant
+           ;
+
+IntConstant    : T_IntConstant       { $$ = NULL; }
+               ;
+            
+DoubleConstant : T_DoubleConstant    { $$ = NULL; }
+               ;
+               
+BoolConstant   : T_BoolConstant      { $$ = NULL; }
+               ;
+               
+StringConstant : T_StringConstant    { $$ = NULL; }
+               ;
+               
+NullConstant   : T_Null              { $$ = NULL; }
+               ;
  /*** END dcc - Change the dcc grammar rules above ***/
 
 %% /*** Additional Code ***/
