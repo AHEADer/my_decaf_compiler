@@ -149,7 +149,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <namedtype>     Extend
 %type <decl>	      Field
 %type <declList>      Fields
-%type <decl>	      Prototype
+%type <decl>	        Prototype
 %type <declList>      Prototypes
 %type <vardecls>      VarDecls
 %type <stmt>          Stmt
@@ -164,12 +164,12 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <casestmts>     Cases
 %type <casestmt>      Case
 %type <defaultstmt>   Default
-%type <pntstmt>	  PrintStmt
+%type <pntstmt>	      PrintStmt
 %type <expr>          Expr
 %type <expr>          OptExpr
 %type <exprs>         Exprs
-%type <exprs>	      Actuals
-%type <expr>	      Constant
+%type <exprs>	        Actuals
+%type <expr>	        Constant
 %type <intconst>      IntConstant 
 %type <boolconst>     BoolConstant
 %type <stringconst>   StringConstant
@@ -229,6 +229,7 @@ Program   :    DeclList              {
                                       if (ReportError::NumErrors() == 0)
                                         {
                                           $$->Print(0);
+                                          printf("hhh\n");
                                         }
                                      }
           ;
@@ -399,7 +400,7 @@ Expr       :  AssignExpr             {$$ = $1;}
            |  RelationalExpr         {$$ = $1;}
            |  LogicalExpr            {$$ = $1;}
            |  PostfixExpr            {$$ = $1;}
-    	   |  T_ReadInteger '(' ')'  { $$ = new ReadIntegerExpr(Join(@1, @3)); }
+    	     |  T_ReadInteger '(' ')'  { $$ = new ReadIntegerExpr(Join(@1, @3)); }
            |  T_ReadLine '(' ')'     { $$ = new ReadLineExpr(Join(@1, @3)); }
            |  T_New T_Identifier     { $$ = new NewExpr(Join(@1, @2), new NamedType(new Identifier(@2, $2))); }
            |  T_NewArray '(' Expr ',' Type ')'
@@ -524,4 +525,5 @@ void InitParser()
 {
    PrintDebug("parser", "Initializing parser");
    yydebug = false;
+   
 }
