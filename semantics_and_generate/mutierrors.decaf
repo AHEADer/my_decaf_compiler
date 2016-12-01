@@ -1,0 +1,21 @@
+
+class Cow extends Animal {
+  bool isSpotted;
+  bool IsSpottedCow() {
+    return isSpotted;
+  }
+}
+
+
+void main() {
+  int a = 5.7;
+  float b = 2.3
+  Cow betsy;
+  betsy = new Cow, true;
+  
+  betsy.IsSpottedCow(5, break);
+}
+      
+
+
+ 
