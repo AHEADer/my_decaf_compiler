@@ -12,6 +12,7 @@
 
 #include "ast.h"
 #include "ast_stmt.h"
+#include "ast_type.h"
 #include "list.h"
 
 class NamedType; // for new
@@ -20,9 +21,14 @@ class Type; // for NewArray
 
 class Expr : public Stmt
 {
+  protected:
+    Type *type;
+
   public:
     Expr(yyltype loc) : Stmt(loc) {}
     Expr() : Stmt() {}
+    virtual Type *GetType() { return type; }
+    virtual const char *GetTypeName() { if (type) return type->GetTypeName(); else return NULL;}
 };
 
 /* This node type is used for those places where an expression is optional.
@@ -114,6 +120,9 @@ class ArithmeticExpr : public CompoundExpr
     ArithmeticExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     ArithmeticExpr(Operator *op, Expr *rhs) : CompoundExpr(op,rhs) {}
     const char *GetPrintNameForNode() { return "ArithmeticExpr"; }
+    void CheckStatementsError();
+    Type *GetType() { return right->GetType();}
+    const char* GetTypeName() { return right->GetTypeName();}
 };
 
 class RelationalExpr : public CompoundExpr

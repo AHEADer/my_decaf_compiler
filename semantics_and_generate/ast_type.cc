@@ -46,8 +46,20 @@ ArrayType::ArrayType(yyltype loc, Type *et) : Type(loc) {
     Assert(et != NULL);
     (elemType=et)->SetParent(this);
 }
+
 void ArrayType::PrintChildren(int indentLevel) {
     elemType->Print(indentLevel+1);
+}
+
+const char *ArrayType::GetTypeName() { 
+  if (this->elemType) 
+    {
+      string delim = "[]";
+      string str = this->elemType->GetTypeName() + delim;
+      return str.c_str();
+    }
+  else 
+    return NULL;
 }
 
 

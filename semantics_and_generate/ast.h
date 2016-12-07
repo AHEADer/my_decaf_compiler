@@ -33,6 +33,11 @@
 
 #include <stdlib.h>   // for NULL
 #include "location.h"
+#include "sparsepp.h"
+#include "errors.h"
+#include "list.h"
+
+using spp::sparse_hash_map;
 
 class Node  {
   protected:
@@ -50,6 +55,9 @@ class Node  {
 
     virtual const char *GetPrintNameForNode() = 0;
     
+    virtual void CheckDeclError() {}
+    virtual void CheckStatementsError() {}
+    //virtual sparse_hash_map<Decl*> *GetSymTable() {return NULL;}
     // Print() is deliberately _not_ virtual
     // subclasses should override PrintChildren() instead
     void Print(int indentLevel, const char *label = NULL); 
@@ -66,6 +74,7 @@ class Identifier : public Node
     Identifier(yyltype loc, const char *name);
     const char *GetPrintNameForNode()   { return "Identifier"; }
     void PrintChildren(int indentLevel);
+    const char *GetName() { return name; }
 };
 
 
