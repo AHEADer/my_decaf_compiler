@@ -39,7 +39,7 @@
       <file leaf-file-name="mips.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mips.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="266">
+            <state relative-caret-position="86">
               <caret line="19" column="10" lean-forward="false" selection-start-line="19" selection-start-column="10" selection-end-line="19" selection-end-column="10" />
               <folding>
                 <element signature="e#33#49#0" expanded="true" />
@@ -48,21 +48,31 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="mips.cc" pinned="false" current-in-tab="false">
+      <file leaf-file-name="mips.cc" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/mips.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="490">
-              <caret line="69" column="10" lean-forward="false" selection-start-line="69" selection-start-column="10" selection-end-line="69" selection-end-column="10" />
+            <state relative-caret-position="505">
+              <caret line="80" column="73" lean-forward="false" selection-start-line="80" selection-start-column="73" selection-end-line="80" selection-end-column="73" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="tac.h" pinned="false" current-in-tab="true">
+      <file leaf-file-name="tac.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tac.h">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="435">
               <caret line="29" column="34" lean-forward="false" selection-start-line="29" selection-start-column="34" selection-end-line="29" selection-end-column="34" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="tac.cc" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/tac.cc">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="180">
+              <caret line="12" column="0" lean-forward="true" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -85,8 +95,9 @@
       <list>
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/mips.h" />
-        <option value="$PROJECT_DIR$/mips.cc" />
         <option value="$PROJECT_DIR$/tac.h" />
+        <option value="$PROJECT_DIR$/tac.cc" />
+        <option value="$PROJECT_DIR$/mips.cc" />
       </list>
     </option>
   </component>
@@ -325,16 +336,16 @@
       <option name="presentableId" value="Default" />
       <updated>1481937747608</updated>
       <workItem from="1481937748808" duration="254000" />
-      <workItem from="1481938012996" duration="5179000" />
+      <workItem from="1481938012996" duration="7136000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="5433000" />
+    <option name="totallyTimeSpent" value="7390000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="835" y="0" width="1041" height="1000" extended-state="0" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.33688286" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -400,7 +411,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/mips.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="266">
+        <state relative-caret-position="86">
           <caret line="19" column="10" lean-forward="false" selection-start-line="19" selection-start-column="10" selection-end-line="19" selection-end-column="10" />
           <folding>
             <element signature="e#33#49#0" expanded="true" />
@@ -408,10 +419,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mips.cc">
+    <entry file="file://$PROJECT_DIR$/tac.cc">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="490">
-          <caret line="69" column="10" lean-forward="false" selection-start-line="69" selection-start-column="10" selection-end-line="69" selection-end-column="10" />
+        <state relative-caret-position="180">
+          <caret line="12" column="0" lean-forward="true" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -420,6 +431,14 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="435">
           <caret line="29" column="34" lean-forward="false" selection-start-line="29" selection-start-column="34" selection-end-line="29" selection-end-column="34" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mips.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="505">
+          <caret line="80" column="73" lean-forward="false" selection-start-line="80" selection-start-column="73" selection-end-line="80" selection-end-column="73" />
           <folding />
         </state>
       </provider>

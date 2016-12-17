@@ -63,10 +63,21 @@ Mips::Register Mips::SelectRegisterToSpill(Register avoid1, Register avoid2)
     return lastUsed;
 }
 
+/* Method: SpillRegister
+ * ---------------------
+ * "Empties" register.  If variable is currently slaved in this register
+ * and its contents are out of synch with memory (isDirty), we write back
+ * the current contents to memory. We then clear the descriptor so we
+ * realize the register is empty.
+ */
 void Mips::SpillRegister(Register reg)
 {
     Location *var = regs[reg].var;
     if (var && regs[reg].isDirty) {
-        //const char *offsetFromWhere = var->
+        const char *offsetFromWhere = var->GetSegment() == fpRelative? regs[fp].name:
+                                      regs[gp].name;
+        Assert(var->GetOffset()%4 == 0);    //all variables should be 4 bytes in size
+        Emit("sw %s, %d(%s)\t# spill %s from %s to %s%+d", regs[reg].name,
+        var->GetOffset(), offsetFromWhere, var->GetName(), regs[reg].name);
     }
 }
