@@ -38,6 +38,11 @@
 #include "hashtable.h"
 #include "list.h"
 #include "location.h"
+#include "sparsepp.h"
+#include "errors.h"
+#include "list.h"
+
+using spp::sparse_hash_map;
 
 class Decl;
 
@@ -55,9 +60,21 @@ class Node  {
   void SetParent(Node *p)  { parent = p; }
   Node *GetParent()        { return parent; }
 
+<<<<<<< HEAD
   virtual void CheckDeclError() {}
   virtual void CheckStatements() {}
   virtual Hashtable<Decl*> *GetSymTable() { return NULL; }
+=======
+    virtual const char *GetPrintNameForNode() = 0;
+    
+    virtual void CheckDeclError() {}
+    virtual void CheckStatementsError() {}
+    //virtual sparse_hash_map<Decl*> *GetSymTable() {return NULL;}
+    // Print() is deliberately _not_ virtual
+    // subclasses should override PrintChildren() instead
+    void Print(int indentLevel, const char *label = NULL); 
+    virtual void PrintChildren(int indentLevel)  {}
+>>>>>>> f1924cde196d558e91d8cc331e0a2a5b9a4357f3
 };
    
 
@@ -66,12 +83,20 @@ class Identifier : public Node
  protected:
   char *name;
     
+<<<<<<< HEAD
  public:
   Identifier(yyltype loc, const char *name);
   const char *GetName() { return name; }
   Decl *CheckIdDecl();
   Decl *CheckIdDecl(Hashtable<Decl*> *sym_table, const char *name);
   friend ostream& operator<<(ostream& out, Identifier *id) { if (id) return out << id->name; else return out;}
+=======
+  public:
+    Identifier(yyltype loc, const char *name);
+    const char *GetPrintNameForNode()   { return "Identifier"; }
+    void PrintChildren(int indentLevel);
+    const char *GetName() { return name; }
+>>>>>>> f1924cde196d558e91d8cc331e0a2a5b9a4357f3
 };
 
 

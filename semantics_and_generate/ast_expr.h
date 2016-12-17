@@ -106,9 +106,16 @@ class ArithmeticExpr : public CompoundExpr
   public:
     ArithmeticExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     ArithmeticExpr(Operator *op, Expr *rhs) : CompoundExpr(op,rhs) {}
+<<<<<<< HEAD
     void CheckStatements();
     Type *GetType() { return right->GetType(); }
     const char *GetTypeName() { return right->GetTypeName();}
+=======
+    const char *GetPrintNameForNode() { return "ArithmeticExpr"; }
+    void CheckStatementsError();
+    Type *GetType() { return right->GetType();}
+    const char* GetTypeName() { return right->GetTypeName();}
+>>>>>>> f1924cde196d558e91d8cc331e0a2a5b9a4357f3
 };
 
 class RelationalExpr : public CompoundExpr
