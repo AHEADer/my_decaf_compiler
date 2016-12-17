@@ -1,0 +1,6 @@
+/opt/clion/bin/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/david/Github/my_decaf_compiler/semantics_and_generate
+CMake Error: Error in cmake code at
+/home/david/Github/my_decaf_compiler/semantics_and_generate/CMakeLists.txt:9:
+Parse error.  Expected "(", got unquoted argument with text "=".
+-- Configuring incomplete, errors occurred!
+See also "/home/david/Github/my_decaf_compiler/semantics_and_generate/cmake-build-debug/CMakeFiles/CMakeOutput.log".

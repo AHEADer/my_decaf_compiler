@@ -20,52 +20,58 @@
  * set up links in both directions. The parent link is typically not used 
  * during parsing, but is more important in later phases.
  *
- * Printing: The only interesting behavior of the node classes for pp2 is the 
- * ability to print the tree using an in-order walk.  Each node class is 
- * responsible for printing itself/children by overriding the virtual 
- * PrintChildren() and GetPrintNameForNode() methods. All the classes we 
- * provide already implement these methods, so your job is to construct the
- * nodes and wire them up during parsing. Once that's done, printing is a snap!
+ * Semantic analysis: For pp3 you are adding "Check" behavior to the ast
+ * node classes. Your semantic analyzer should do an inorder walk on the
+ * parse tree, and when visiting each node, verify the particular
+ * semantic rules that apply to that construct.
+
  */
 
 #ifndef _H_ast
 #define _H_ast
 
 #include <stdlib.h>   // for NULL
+
+#include <iostream>
+
+#include "errors.h"
+#include "hashtable.h"
+#include "list.h"
 #include "location.h"
 
+class Decl;
+
 class Node  {
-  protected:
-    yyltype *location;
-    Node *parent;
+ protected:
+  yyltype *location;
+  Node *parent;
 
-  public:
-    Node(yyltype loc);
-    Node();
-    virtual ~Node() {}
+ public:
+  Node(yyltype loc);
+  Node();
+  virtual ~Node() {}
     
-    yyltype *GetLocation()   { return location; }
-    void SetParent(Node *p)  { parent = p; }
-    Node *GetParent()        { return parent; }
+  yyltype *GetLocation()   { return location; }
+  void SetParent(Node *p)  { parent = p; }
+  Node *GetParent()        { return parent; }
 
-    virtual const char *GetPrintNameForNode() = 0;
-    
-    // Print() is deliberately _not_ virtual
-    // subclasses should override PrintChildren() instead
-    void Print(int indentLevel, const char *label = NULL); 
-    virtual void PrintChildren(int indentLevel)  {}
+  virtual void CheckDeclError() {}
+  virtual void CheckStatements() {}
+  virtual Hashtable<Decl*> *GetSymTable() { return NULL; }
 };
    
 
 class Identifier : public Node 
 {
-  protected:
-    char *name;
+ protected:
+  char *name;
     
-  public:
-    Identifier(yyltype loc, const char *name);
-    const char *GetPrintNameForNode()   { return "Identifier"; }
-    void PrintChildren(int indentLevel);
+ public:
+  Identifier(yyltype loc, const char *name);
+  const char *GetName() { return name; }
+  Decl *CheckIdDecl();
+  Decl *CheckIdDecl(Hashtable<Decl*> *sym_table, const char *name);
+  friend ostream& operator<<(ostream& out, Identifier *id) { if (id) return out << id->name; else return out;}
 };
 
 
@@ -76,11 +82,8 @@ class Identifier : public Node
 // when your parser can continue after an error.
 class Error : public Node
 {
-  public:
-    Error() : Node() {}
-    const char *GetPrintNameForNode()   { return "Error"; }
+ public:
+ Error() : Node() {}
 };
-
-
 
 #endif

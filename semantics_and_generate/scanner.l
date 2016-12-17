@@ -142,8 +142,7 @@ END_COMMENT        ("*/")
                            return T_StringConstant;
                          }
 {BEG_STRING}             {
-                          ReportError::UntermString(&yylloc, yytext);      
-                          return T_Error; 
+                          ReportError::UntermString(&yylloc, yytext);       
                          }
 {BOOLEAN}                { 
                            if (strcmp("true", yytext) == 0)
@@ -166,13 +165,13 @@ END_COMMENT        ("*/")
  /* recognize identifiers, 
   * return the correct token and set appropriate fields of yylval 
   */
-{IDENTIFIER}  { 
-                  if (yyleng > MaxIdentLen)
+{IDENTIFIER}             { 
+                          if (yyleng > MaxIdentLen)
         	            ReportError::LongIdentifier(&yylloc, yytext);
-			                strncpy(yylval.identifier, yytext, MaxIdentLen);
-			                yylval.identifier[MaxIdentLen] = '\0';   
+			  strncpy(yylval.identifier, yytext, MaxIdentLen);
+			  yylval.identifier[MaxIdentLen] = '\0';   
 			  
-			                return T_Identifier;
+			  return T_Identifier;
 		        }
 
  /* consume single-line comment */
@@ -188,14 +187,12 @@ END_COMMENT        ("*/")
 <COMMENT>{END_COMMENT}  { BEGIN INITIAL; }
 <COMMENT><<EOF>>        { 
 			  ReportError::UntermComment();
-        return T_Error;
 			  BEGIN INITIAL;
 			}
  /* all other characters are reported as errors */
-.     { 
-          ReportError::UnrecogChar(&yylloc, yytext[0]);   
-          return T_Error;  
-		  }
+.                       { 
+                          ReportError::UnrecogChar(&yylloc, yytext[0]);     
+			}
 
 %%
 /* The closing %% above marks the end of the Rules section and the beginning

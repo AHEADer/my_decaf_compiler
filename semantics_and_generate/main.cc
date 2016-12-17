@@ -25,7 +25,6 @@ int main(int argc, char *argv[])
     InitScanner();
     InitParser();
     yyparse();
-    //printf("total errors are %d\n", ReportError::NumErrors());
     return (ReportError::NumErrors() == 0? 0 : -1);
 }
 

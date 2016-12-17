@@ -228,9 +228,7 @@ Program   :    DeclList              {
                                       // if no errors, advance to next phase
                                       if (ReportError::NumErrors() == 0)
                                         {
-                                          //$$->Print(0);
-                                          $$->CheckDeclError();
-                                          $$->CheckStatements();
+                                          $$->Print(0);
                                         }
                                      }
           ;

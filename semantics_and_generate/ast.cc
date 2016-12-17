@@ -1,50 +1,55 @@
 /* File: ast.cc
-* ------------
-*/
+ * ------------
+ */
+
+#include <stdio.h>  // printf
+#include <string.h> // strdup
 
 #include "ast.h"
-#include "ast_type.h"
 #include "ast_decl.h"
-#include <string.h> // strdup
-#include <stdio.h>  // printf
+#include "ast_stmt.h"
+#include "ast_type.h"
+#include "errors.h"
 
 Node::Node(yyltype loc) {
-    location = new yyltype(loc);
-    parent = NULL;
+  this->location = new yyltype(loc);
+  this->parent = NULL;
 }
 
 Node::Node() {
-    location = NULL;
-    parent = NULL;
+  this->location = NULL;
+  this->parent = NULL;
 }
-
-/* The Print method is used to print the parse tree nodes.
-* If this node has a location (most nodes do, but some do not), it
-* will first print the line number to help you match the parse tree
-* back to the source text. It then indents the proper number of levels
-* and prints the "print name" of the node. It then will invoke the
-* virtual function PrintChildren which is expected to print the
-* internals of the node (itself & children) as appropriate.
-*/
-void Node::Print(int indentLevel, const char *label) {
-    const int numSpaces = 4;
-    printf("\n");
-    if (GetLocation())
-        printf("%d", GetLocation()->first_line);
-    else
-        printf("%*s", numSpaces, "");
-    printf("%*s%s%s: ", indentLevel*numSpaces, "",
-           label? label : "", GetPrintNameForNode());
-   PrintChildren(indentLevel);
-}
-
+	 
 Identifier::Identifier(yyltype loc, const char *n) : Node(loc) {
-    name = strdup(n);
+  this->name = strdup(n);
 }
 
-void Identifier::PrintChildren(int indentLevel) {
-    printf("%s", name);
+// look for declaration from inner most scope to global scope
+Decl *Identifier::CheckIdDecl() {
+  Decl *decl = NULL;
+  Node *parent = this->GetParent();
+  while (parent)
+    {
+      Hashtable<Decl*> *sym_table = parent->GetSymTable();
+      if (sym_table != NULL)
+	{
+	  if ((decl = sym_table->Lookup(this->name)) != NULL)
+	    return decl;
+	}
+      parent = parent->GetParent();
+    }
+
+  decl = Program::sym_table->Lookup(this->name);
+
+  return decl;
 }
 
-
-
+// look for declaration in the provided scope
+Decl *Identifier::CheckIdDecl(Hashtable<Decl*> *sym_table, const char *name)
+{
+  Decl *decl = NULL;
+  if (sym_table)
+    decl = sym_table->Lookup(name);
+  return decl;
+}

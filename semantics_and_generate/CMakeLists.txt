@@ -1,13 +1,13 @@
-## 
+##
 ## Simple makefile for CS143 programming projects
 ##
 
-.PHONY: clean strip
+#.PHONY: clean strip
 
 # Set the default target. When you make with no arguments,
 # this will be the target built.
 COMPILER = dcc
-PRODUCTS = $(COMPILER) 
+PRODUCTS = $(COMPILER)
 default: $(PRODUCTS)
 
 # Set up the list of source and object files
@@ -47,39 +47,39 @@ LIBS = -lc -lm -lfl
 # Rules for various parts of the target
 
 .yy.o: $*.yy.c
-	$(CC) $(CFLAGS) -c -o $@ $*.cc
+$(CC) $(CFLAGS) -c -o $@ $*.cc
 
-lex.yy.c: scanner.l  parser.y y.tab.h 
-	$(LEX) $(LEXFLAGS) scanner.l
+lex.yy.c: scanner.l  parser.y y.tab.h
+$(LEX) $(LEXFLAGS) scanner.l
 
 y.tab.o: y.tab.c
-	$(CC) $(CFLAGS) -c -o y.tab.o y.tab.c
+$(CC) $(CFLAGS) -c -o y.tab.o y.tab.c
 
 y.tab.h y.tab.c: parser.y
-	$(YACC) $(YACCFLAGS) parser.y
+$(YACC) $(YACCFLAGS) parser.y
 .cc.o: $*.cc
-	$(CC) $(CFLAGS) -c -o $@ $*.cc
+$(CC) $(CFLAGS) -c -o $@ $*.cc
 
 # rules to build compiler (dcc)
 
 $(COMPILER) :  $(OBJS)
-	$(LD) -o $@ $(OBJS) $(LIBS)
+$(LD) -o $@ $(OBJS) $(LIBS)
 
 
 # This target is to build small for testing (no debugging info), removes
 # all intermediate products, too
 strip : $(PRODUCTS)
-	strip $(PRODUCTS)
-	rm -rf $(JUNK)
+strip $(PRODUCTS)
+rm -rf $(JUNK)
 
 
-# make depend will set up the header file dependencies for the 
+# make depend will set up the header file dependencies for the
 # assignment.  You should make depend whenever you add a new header
 # file to the project or move the project between machines
 #
 depend:
-	makedepend -- $(CFLAGS) -- $(SRCS)
+makedepend -- $(CFLAGS) -- $(SRCS)
 
 clean:
-	rm -f $(JUNK) y.output $(PRODUCTS)
+rm -f $(JUNK) y.output $(PRODUCTS)
 

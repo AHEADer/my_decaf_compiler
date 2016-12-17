@@ -10,19 +10,25 @@
 #ifndef _H_ast_expr
 #define _H_ast_expr
 
+#include <string>
+
 #include "ast.h"
 #include "ast_stmt.h"
+#include "ast_type.h"
 #include "list.h"
 
-class NamedType; // for new
-class Type; // for NewArray
-
+class FnDecl;
 
 class Expr : public Stmt
 {
+  protected:
+    Type *type;
+
   public:
     Expr(yyltype loc) : Stmt(loc) {}
     Expr() : Stmt() {}
+    virtual Type *GetType() { return type; }
+    virtual const char *GetTypeName() { if (type) return type->GetTypeName(); else return NULL;}
 };
 
 /* This node type is used for those places where an expression is optional.
@@ -30,19 +36,15 @@ class Expr : public Stmt
 * NULL. By using a valid, but no-op, node, we save that trouble */
 class EmptyExpr : public Expr
 {
-  public:
-    const char *GetPrintNameForNode() { return "Empty"; }
 };
 
 class IntConstant : public Expr
 {
   protected:
     int value;
-  
+
   public:
     IntConstant(yyltype loc, int val);
-    const char *GetPrintNameForNode() { return "IntConstant"; }
-    void PrintChildren(int indentLevel);
 };
 
 class DoubleConstant : public Expr
@@ -52,8 +54,6 @@ class DoubleConstant : public Expr
     
   public:
     DoubleConstant(yyltype loc, double val);
-    const char *GetPrintNameForNode() { return "DoubleConstant"; }
-    void PrintChildren(int indentLevel);
 };
 
 class BoolConstant : public Expr
@@ -63,8 +63,6 @@ class BoolConstant : public Expr
     
   public:
     BoolConstant(yyltype loc, bool val);
-    const char *GetPrintNameForNode() { return "BoolConstant"; }
-    void PrintChildren(int indentLevel);
 };
 
 class StringConstant : public Expr
@@ -74,15 +72,12 @@ class StringConstant : public Expr
     
   public:
     StringConstant(yyltype loc, const char *val);
-    const char *GetPrintNameForNode() { return "StringConstant"; }
-    void PrintChildren(int indentLevel);
 };
 
 class NullConstant: public Expr
 {
   public:
-    NullConstant(yyltype loc) : Expr(loc) {}
-    const char *GetPrintNameForNode() { return "NullConstant"; }
+    NullConstant(yyltype loc);
 };
 
 class Operator : public Node
@@ -92,8 +87,7 @@ class Operator : public Node
     
   public:
     Operator(yyltype loc, const char *tok);
-    const char *GetPrintNameForNode() { return "Operator"; }
-    void PrintChildren(int indentLevel);
+    friend ostream &operator<<(ostream &out, Operator *op) { if (op) return out << op->tokenString; else return out; }
  };
  
 class CompoundExpr : public Expr
@@ -105,7 +99,6 @@ class CompoundExpr : public Expr
   public:
     CompoundExpr(Expr *lhs, Operator *op, Expr *rhs); // for binary
     CompoundExpr(Operator *op, Expr *rhs); // for unary
-    void PrintChildren(int indentLevel);
 };
 
 class ArithmeticExpr : public CompoundExpr
@@ -113,21 +106,27 @@ class ArithmeticExpr : public CompoundExpr
   public:
     ArithmeticExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     ArithmeticExpr(Operator *op, Expr *rhs) : CompoundExpr(op,rhs) {}
-    const char *GetPrintNameForNode() { return "ArithmeticExpr"; }
+    void CheckStatements();
+    Type *GetType() { return right->GetType(); }
+    const char *GetTypeName() { return right->GetTypeName();}
 };
 
 class RelationalExpr : public CompoundExpr
 {
   public:
     RelationalExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
-    const char *GetPrintNameForNode() { return "RelationalExpr"; }
+    void CheckStatements();
+    Type *GetType() { return Type::boolType; }
+    const char *GetTypeName() { return "bool"; }
 };
 
 class EqualityExpr : public CompoundExpr
 {
   public:
     EqualityExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
-    const char *GetPrintNameForNode() { return "EqualityExpr"; }
+    void CheckStatements();
+    Type *GetType() { return Type::boolType; }
+    const char *GetTypeName() { return "bool"; }
 };
 
 class LogicalExpr : public CompoundExpr
@@ -135,14 +134,19 @@ class LogicalExpr : public CompoundExpr
   public:
     LogicalExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
     LogicalExpr(Operator *op, Expr *rhs) : CompoundExpr(op,rhs) {}
-    const char *GetPrintNameForNode() { return "LogicalExpr"; }
+    void CheckStatements();
+    Type *GetType() { return Type::boolType; }
+    const char *GetTypeName() { return "bool"; }
 };
 
 class AssignExpr : public CompoundExpr
 {
   public:
     AssignExpr(Expr *lhs, Operator *op, Expr *rhs) : CompoundExpr(lhs,op,rhs) {}
-    const char *GetPrintNameForNode() { return "AssignExpr"; }
+    void CheckStatements();
+    Type *GetType() { return left->GetType(); }
+    const char *GetTypeName() { return left->GetTypeName(); }
+
 };
 
 class LValue : public Expr
@@ -155,7 +159,7 @@ class This : public Expr
 {
   public:
     This(yyltype loc) : Expr(loc) {}
-    const char *GetPrintNameForNode() { return "This"; }
+    void CheckStatements();
 };
 
 class ArrayAccess : public LValue
@@ -165,8 +169,9 @@ class ArrayAccess : public LValue
     
   public:
     ArrayAccess(yyltype loc, Expr *base, Expr *subscript);
-    const char *GetPrintNameForNode() { return "ArrayAccess"; }
-    void PrintChildren(int indentLevel);
+    void CheckStatements();
+    Type *GetType();
+    const char *GetTypeName();
 };
 
 /* Note that field access is used both for qualified names
@@ -179,11 +184,14 @@ class FieldAccess : public LValue
   protected:
     Expr *base; // will be NULL if no explicit base
     Identifier *field;
+    Type *type; // Expr::type is protected and thus not inherited here
     
   public:
-    FieldAccess(Expr *base, Identifier *field); //ok to pass NULL base
-    const char *GetPrintNameForNode() { return "FieldAccess"; }
-    void PrintChildren(int indentLevel);
+    FieldAccess(Expr *base, Identifier *field); // ok to pass NULL base
+    void CheckStatements(); // its type is decided here
+    Identifier *GetField() { return field; }
+    Type *GetType() { return type; }
+    const char *GetTypeName() { if (type) return type->GetTypeName(); else return NULL; }
 };
 
 /* Like field access, call is used both for qualified base.field()
@@ -199,8 +207,10 @@ class Call : public Expr
     
   public:
     Call(yyltype loc, Expr *base, Identifier *field, List<Expr*> *args);
-    const char *GetPrintNameForNode() { return "Call"; }
-    void PrintChildren(int indentLevel);
+    void CheckArguments(FnDecl *fndecl); // check arguments against formal parameters
+    void CheckStatements(); // its type is decided here
+    Type *GetType() { return type; }
+    const char *GetTypeName() { if (type) return type->GetTypeName(); else return NULL; }
 };
 
 class NewExpr : public Expr
@@ -210,8 +220,9 @@ class NewExpr : public Expr
     
   public:
     NewExpr(yyltype loc, NamedType *clsType);
-    const char *GetPrintNameForNode() { return "NewExpr"; }
-    void PrintChildren(int indentLevel);
+    void CheckStatements();
+    Type *GetType() { return cType; }
+    const char *GetTypeName() { if (cType) return cType->GetTypeName(); else return NULL;  }
 };
 
 class NewArrayExpr : public Expr
@@ -222,22 +233,20 @@ class NewArrayExpr : public Expr
     
   public:
     NewArrayExpr(yyltype loc, Expr *sizeExpr, Type *elemType);
-    const char *GetPrintNameForNode() { return "NewArrayExpr"; }
-    void PrintChildren(int indentLevel);
+    void CheckStatements();
+    const char *GetTypeName();
 };
 
 class ReadIntegerExpr : public Expr
 {
   public:
-    ReadIntegerExpr(yyltype loc) : Expr(loc) {}
-    const char *GetPrintNameForNode() { return "ReadIntegerExpr"; }
+    ReadIntegerExpr(yyltype loc);
 };
 
 class ReadLineExpr : public Expr
 {
   public:
-    ReadLineExpr(yyltype loc) : Expr(loc) {}
-    const char *GetPrintNameForNode() { return "ReadLineExpr"; }
+    ReadLineExpr(yyltype loc);
 };
 
 
@@ -249,8 +258,9 @@ class PostfixExpr : public Expr
 
   public:
     PostfixExpr(yyltype loc, LValue *lv, Operator *op);
-    const char *GetPrintNameForNode() { return "PostfixExpr"; }
-    void PrintChildren(int indentLevel);
+    void CheckStatements();
+    Type *GetType() { if (lvalue) return lvalue->GetType(); else return NULL; }
+    const char *GetTypeName() { if (lvalue) return lvalue->GetTypeName(); else return NULL; }
 };
     
 #endif
