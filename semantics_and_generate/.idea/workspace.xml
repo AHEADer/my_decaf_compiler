@@ -61,8 +61,8 @@
       <file leaf-file-name="tac.h" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tac.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="18" column="45" lean-forward="false" selection-start-line="18" selection-start-column="45" selection-end-line="18" selection-end-column="45" />
+            <state relative-caret-position="435">
+              <caret line="29" column="34" lean-forward="false" selection-start-line="29" selection-start-column="34" selection-end-line="29" selection-end-column="34" />
               <folding />
             </state>
           </provider>
@@ -325,12 +325,12 @@
       <option name="presentableId" value="Default" />
       <updated>1481937747608</updated>
       <workItem from="1481937748808" duration="254000" />
-      <workItem from="1481938012996" duration="4909000" />
+      <workItem from="1481938012996" duration="5179000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="5163000" />
+    <option name="totallyTimeSpent" value="5433000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="835" y="0" width="1041" height="1000" extended-state="0" />
@@ -418,8 +418,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tac.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="18" column="45" lean-forward="false" selection-start-line="18" selection-start-column="45" selection-end-line="18" selection-end-column="45" />
+        <state relative-caret-position="435">
+          <caret line="29" column="34" lean-forward="false" selection-start-line="29" selection-start-column="34" selection-end-line="29" selection-end-column="34" />
           <folding />
         </state>
       </provider>

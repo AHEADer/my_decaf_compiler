@@ -19,4 +19,15 @@ public:
     int GetOffset()         { return offset;}
 };
 
+class Instruction {
+protected:
+    char printed[128];
+
+public:
+    virtual ~Instruction() {}
+    virtual void Print();
+    virtual void EmitSpecific(Mips *mips) = 0;
+    virtual void Emit(Mips *mips);
+};
+
 #endif
