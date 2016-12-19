@@ -19,6 +19,11 @@ private:
         bool isGeneralPurpose;
     } regs[NumRegs];     //registers state
 
+/*
+ *A "spilled variable" is a variable in main memory rather than in a CPU register. 
+ *The operation of moving a variable from a register to memory is called spilling, 
+ *while the reverse operation of moving a variable from memory to a register is called filling.
+ */
     Register lastUsed;
     typedef enum {ForRead, ForWrite} Reason;
     Register GetRegister(Location *var, Reason reason, Register avoid1, Register avoid2);
@@ -39,6 +44,9 @@ private:
 public:
 
     Mips();
+    static void Emit(const char* fmt, ...);
+
+    void EmitLoadConst(Location *dst, int val);
 
 };
 

@@ -23,7 +23,44 @@ Mips::Register Mips::GetRegister(Location *var, Reason reason,
             reg = SelectRegisterToSpill(avoid1, avoid2);
             SpillRegister(reg);
         }
+        regs[reg].var = var;
+        if (reason == ForRead) {
+        	Assert(var->GetOffset()%4 == 0); 	//all variables should be 4 bytes in size
+        	const char *offsetFromWhere = var->GetSegment() == fpRelative?
+        	regs[fp].name:regs[gp].name;
+        	Emit("lw %s, %d(%s)\t# load %s from %s%+d into %s",
+        		regs[reg].name, 
+        		var->GetOffset(), offsetFromWhere, var->GetName(),
+        		offsetFromWhere, var->GetOffset(), regs[reg].name);
+        	regs[reg].isDirty = false;
+        }
     }
+    if (reason == ForWrite)
+    {
+    	regs[reg].isDirty = true;
+    }
+    return reg;
+}
+
+Mips::Register Mips::GetRegister(Location *var, Register avoid1)
+{
+	return GetRegister(var, ForRead, avoid1, zero);
+}
+
+Mips:Register Mips::GetRegisterForWrite(Location *var, Register avoid1, Register avoid2)
+{
+	return GetRegister(var, ForWrite, avoid1, avoid2);
+}
+
+static bool LocationAreSame(Location *var1, Location *var2)
+{
+	return (var1==var2 || (
+		var1 && var2 &&
+		!strcmp(var1->GetName(), var2->GetName()) &&
+		var1->GetSegment() == var2->GetSegment() &&
+		var1->GetOffset() == var2->GetOffset()
+		)
+	);
 }
 
 bool Mips::FindRegisterWithContents(Location *var, Register &reg)
@@ -36,7 +73,6 @@ bool Mips::FindRegisterWithContents(Location *var, Register &reg)
 
 
 /*
- * I have some questions about this!
  * Method: SelectRegisterToSpill
  * -----------------------------
  * Chooses an in-use register to replace with a new variable. We
@@ -78,6 +114,60 @@ void Mips::SpillRegister(Register reg)
                                       regs[gp].name;
         Assert(var->GetOffset()%4 == 0);    //all variables should be 4 bytes in size
         Emit("sw %s, %d(%s)\t# spill %s from %s to %s%+d", regs[reg].name,
-        var->GetOffset(), offsetFromWhere, var->GetName(), regs[reg].name);
+        var->GetOffset(), offsetFromWhere, 
+        var->GetName(), regs[reg].name,
+        offsetFromWhere, var->GetOffset());
     }
+    regs[reg].var = NULL;
+}
+
+void Mips::SpillAllDirtyRegisters()
+{
+	Register i;
+	for (int i = zero; i < NumRegs; i = (Register)(i+1))
+	{
+		if (regs[i].var && regs[i].isDirty)
+		{
+			break;
+		}
+	}
+
+	if (i!= NumRegs) //none are dirty
+	{
+		Emit("# (save modified registers before flow of control change)");
+	}
+	for (int i = zero; i < NumRegs; i = (Register)(i+1))
+	{
+		SpillRegister(i);
+	}
+}
+
+/* Method: SpillForEndFunction
+ * ---------------------------
+ * Slight optimization on the above method used when spilling for
+ * end of function (return/fall off). In such a case, we do not
+ * need to save values for locals, temps, and parameters because the
+ * function is about to exit and those variables are going away
+ * immediately, so no need to bother with updating contents.
+ */
+void Mips::SpillForEndFunction()
+{
+	for (int i = zero; i < NumRegs; i = (Register)(i+1))
+	{
+		if (regs[i].isGeneralPurpose && regs[i].var)
+		{
+			if (regs[i].var->GetSegment() == gpRelative)
+			{
+				SpillRegister(i);
+			}
+			else	//eliminate things on stack
+				regs[i].var = NULL;
+		}
+	}
+}
+
+
+void Mips::Emit(const char* fmt, ...)
+{
+	va_list args;
 }
