@@ -47,7 +47,7 @@ Mips::Register Mips::GetRegister(Location *var, Register avoid1)
 	return GetRegister(var, ForRead, avoid1, zero);
 }
 
-Mips:Register Mips::GetRegisterForWrite(Location *var, Register avoid1, Register avoid2)
+Mips::Register Mips::GetRegisterForWrite(Location *var, Register avoid1, Register avoid2)
 {
 	return GetRegister(var, ForWrite, avoid1, avoid2);
 }
@@ -170,4 +170,219 @@ void Mips::SpillForEndFunction()
 void Mips::Emit(const char* fmt, ...)
 {
 	va_list args;
+    char buf[1024];
+
+    va_start(args, fmt);
+    vsprintf(buf, fmt, args);
+    va_end(args);
+
+    char last = buf[strlen(buf)-1];
+    if (last != ':') printf("\t");
+    printf("%s", buf);
+    if (last!='\n') printf("\n");
+}
+
+/* Method: EmitLoadConstant
+ * ------------------------
+ * Used to assign variable an integer constant value.  Slaves dst into
+ * a register (using GetRegister above) and then emits an li (load
+ * immediate) instruction with the constant value.
+ */
+void Mips::EmitLoadConst(Location *dst, int val)
+{
+    Register reg = GetRegisterForWrite(dst);
+    //li instruction save a immediate number to a register
+    Emit("li %s, %d\t\t# load constant value %d into %s", regs[reg].name,
+         val, val, regs[reg].name);
+}
+
+/* Method: EmitLoadStringConstant
+ * ------------------------------
+ * Used to assign a variable a pointer to string constant. Emits
+ * assembly directives to create a new null-terminated string in the
+ * data segment and assigns it a unique label. Slaves dst into a register
+ * and loads that label address into the register.
+ */
+void Mips::EmitLoadStringConstant(Location *dst, const char *str)
+{
+    static int strNum = 1;
+    char label[16];
+    sprintf(label, "_string%d", strNum++);
+    Emit(".data\t\t\t#create string constant with label");
+    Emit("%s: .asciiz %s", label, str);
+    Emit(".text");
+    EmitLoadLabel(dst, label);
+}
+
+void Mips::EmitLoadLabel(Location *dst, const char *label)
+{
+    Register reg = GetRegisterForWrite(dst);
+    //li instruction save a label address to a register
+    Emit("la %s, %s\t# load label", regs[reg].name, label);
+}
+
+void Mips::EmitCopy(Location *dst, Location *src)
+{
+    Register rSrc = GetRegister(src), rDst = GetRegisterForWrite(dst, rSrc);
+    Emit("move %s, %s\t\t# copy value", regs[rDst].name, regs[rSrc].name);
+}
+
+/* Method: EmitLoad
+ * ----------------
+ * Used to assign dst the contents of memory at the address in reference,
+ * potentially with some positive/negative offset (defaults to 0).
+ * Slaves both ref and dst to registers, then emits a lw instruction
+ * using constant-offset addressing mode y(rx) which accesses the address
+ * at an offset of y bytes from the address currently contained in rx.
+ */
+void Mips::EmitLoad(Location *dst, Location *reference, int offset)
+{
+    Register rSrc = GetRegister(reference), rDst = GetRegisterForWrite(dst, rSrc);
+    Emit("lw %s, %d(%s) \t# load with offset", regs[rDst].name,
+         offset, regs[rSrc].name);
+}
+
+void Mips::EmitStore(Location *reference, Location *value, int offset)
+{
+    Register rVal = GetRegister(value), rRef = GetRegister(reference, rVal);
+    Emit("sw %s, %d(%s)\t# store with offset", regs[rVal].name,
+         offset, regs[rRef].name);
+}
+
+//TODO
+void Mips::EmitBinaryOp(BinaryOp::OpCode code, Location *dst,
+                        Location *op1, Location *op2)
+{
+    Register rLeft = GetRegister(op1), rRight = GetRegister(op2, rLeft);
+    Register rDst = GetRegisterForWrite(dst, rLeft, rRight);
+    Emit("%s %s, %s, %s\t");
+}
+
+/* Method: EmitLabel
+ * -----------------
+ * Used to emit label marker. Before a label, we spill all registers since
+ * we can't be sure what the situation upon arriving at this label (ie
+ * starts new basic block), and rather than try to be clever, we just
+ * wipe the slate clean.
+ */
+void Mips::EmitLabel(const char *label)
+{
+    SpillAllDirtyRegisters();
+    Emit("%s:", label);
+}
+
+/* Method: EmitGoto
+ * ----------------
+ * Used for an unconditional transfer to a named label. Before a goto,
+ * we spill all registers, since we don't know what the situation is
+ * we are heading to (ie this ends current basic block) and rather than
+ * try to be clever, we just wipe slate clean.
+ */
+void Mips::EmitGoto(const char *label)
+{
+    SpillAllDirtyRegisters();
+    Emit("b %s\t\t# unconditional branch", label);
+}
+
+void Mips::EmitIfZ(Location *test, const char *label)
+{
+    Register testReg = GetRegister(test);
+    //same as goto
+    SpillAllDirtyRegisters();
+    Emit("beqz %s, %s\t#branch if %s is zero", regs[testReg].name, label,
+    test->GetName());
+}
+
+/* Method: EmitParam
+ * -----------------
+ * Used to push a parameter on the stack in anticipation of upcoming
+ * function call. Decrements the stack pointer by 4. Slaves argument into
+ * register and then stores contents to location just made at end of
+ * stack.
+ */
+void Mips::EmitParam(Location *arg)
+{
+    Emit("subu $sp, $sp, 4\t# decrement sp to make space for param");
+    Register reg = GetRegister(arg);
+    Emit("sw %s, 4($sp)\t#copy param value to stack");
+}
+
+/* Method: EmitCallInstr
+ * ---------------------
+ * Used to effect a function call. All necessary arguments should have
+ * already been pushed on the stack, this is the last step that
+ * transfers control from caller to callee. We issue
+ * jal for a label, a jalr if address in register. Both will save the
+ * return address in $ra. If there is an expected result passed, we slave
+ * the var to a register and copy function return value from $v0 into that
+ * register.
+ */
+void Mips::EmitCallInstr(Location *dst, const char *fn, bool isL)
+{
+    SpillAllDirtyRegisters();
+    Emit("%s %-15s\t# jump to function", isL? "jal":"jalr", fn);
+    if (dst!=NULL) {
+        Register r1 = GetRegisterForWrite(dst);
+        Emit("move %s, %s\t\t# copy function return value from $v0", regs[r1].name,
+        regs[v0].name);
+    }
+}
+
+void Mips::EmitLCall(Location *result, const char *label)
+{
+    EmitCallInstr(result, label, true);
+}
+
+
+
+
+
+/* Constructor
+ * ----------
+ * Constructor sets up the mips names and register descriptors to
+ * the initial starting state.
+ */
+Mips::Mips() {
+    mipsName[BinaryOp::Add] = "add";
+    mipsName[BinaryOp::Sub] = "sub";
+    mipsName[BinaryOp::Mul] = "mul";
+    mipsName[BinaryOp::Div] = "div";
+    mipsName[BinaryOp::Mod] = "rem";
+    mipsName[BinaryOp::Eq] = "seq";
+    mipsName[BinaryOp::Less] = "slt";
+    mipsName[BinaryOp::And] = "and";
+    mipsName[BinaryOp::Or] = "or";
+    regs[zero] = (RegContents){false, NULL, "$zero", false};
+    regs[at] = (RegContents){false, NULL, "$at", false};
+    regs[v0] = (RegContents){false, NULL, "$v0", false};
+    regs[v1] = (RegContents){false, NULL, "$v1", false};
+    regs[a0] = (RegContents){false, NULL, "$a0", false};
+    regs[a1] = (RegContents){false, NULL, "$a1", false};
+    regs[a2] = (RegContents){false, NULL, "$a2", false};
+    regs[a3] = (RegContents){false, NULL, "$a3", false};
+    regs[k0] = (RegContents){false, NULL, "$k0", false};
+    regs[k1] = (RegContents){false, NULL, "$k1", false};
+    regs[gp] = (RegContents){false, NULL, "$gp", false};
+    regs[sp] = (RegContents){false, NULL, "$sp", false};
+    regs[fp] = (RegContents){false, NULL, "$fp", false};
+    regs[ra] = (RegContents){false, NULL, "$ra", false};
+    regs[t0] = (RegContents){false, NULL, "$t0", true};
+    regs[t1] = (RegContents){false, NULL, "$t1", true};
+    regs[t2] = (RegContents){false, NULL, "$t2", true};
+    regs[t3] = (RegContents){false, NULL, "$t3", true};
+    regs[t4] = (RegContents){false, NULL, "$t4", true};
+    regs[t5] = (RegContents){false, NULL, "$t5", true};
+    regs[t6] = (RegContents){false, NULL, "$t6", true};
+    regs[t7] = (RegContents){false, NULL, "$t7", true};
+    regs[t8] = (RegContents){false, NULL, "$t8", true};
+    regs[t9] = (RegContents){false, NULL, "$t9", true};
+    regs[s0] = (RegContents){false, NULL, "$s0", true};
+    regs[s1] = (RegContents){false, NULL, "$s1", true};
+    regs[s2] = (RegContents){false, NULL, "$s2", true};
+    regs[s3] = (RegContents){false, NULL, "$s3", true};
+    regs[s4] = (RegContents){false, NULL, "$s4", true};
+    regs[s5] = (RegContents){false, NULL, "$s5", true};
+    regs[s6] = (RegContents){false, NULL, "$s6", true};
+    regs[s7] = (RegContents){false, NULL, "$s7", true};
+    lastUsed = zero;
 }
