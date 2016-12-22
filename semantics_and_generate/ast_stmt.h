@@ -5,42 +5,48 @@
  * language (for, if, return, etc.) there is a corresponding
  * node class for that construct. 
  *
- * pp2: You will need to add new expression and statement node c
- * classes for the additional grammar elements (Switch/Postfix)
+ * pp4: You will need to extend the Stmt classes to implement
+ * code generation for statements.
  */
 
 
 #ifndef _H_ast_stmt
 #define _H_ast_stmt
 
+#include <string>
+
 #include "ast.h"
 #include "hashtable.h"
 #include "list.h"
-#include "tac.h"
-#include "codegen.h"
+
+using std::string;
 
 class Decl;
 class VarDecl;
+class FnDecl;
 class Expr;
 class IntConstant;
 
+class CodeGenerator;
+
 class Program : public Node
 {
-protected:
-    List<Decl*> *decls;
+  protected:
+     List<Decl*> *decls;
 
-public:
-    Program(List<Decl*> *declList);
-    void CheckStatements();
-    void CheckDeclError();
-    static Hashtable<Decl*> *sym_table; // global symbol table
-    Location *Emit();
-    static void PrintError(const char *error_msg, FnDecl *fndecl);
-    static string GetClassLabel(const char* classname, const char* name);
-    static string GetFuncLabel(const char* name);
-    static CodeGenerator *cg;
-    static int offset;  //to set global variable offset
-    static string prefix;
+  public:
+     Program(List<Decl*> *declList);
+     void CheckStatements();
+     void CheckDeclError();
+     static Hashtable<Decl*> *sym_table; // global symbol table
+
+     Location *Emit();
+     static void PrintError(const char *error_msg, FnDecl *fndecl); // spim TAC for printing error messages
+     static string GetClassLabel(const char *classname, const char *name);
+     static string GetFuncLabel(const char *name);
+     static CodeGenerator *cg; // code generator for the whole program
+     static int offset; // global variable offset
+     static string prefix;
 };
 
 class Stmt : public Node
@@ -48,7 +54,7 @@ class Stmt : public Node
   public:
      Stmt() : Node() {}
      Stmt(yyltype loc) : Node(loc) {}
-    char* next;
+     char *next; // label to goto after while/for/switch
 };
 
 class StmtBlock : public Stmt 
@@ -63,8 +69,8 @@ class StmtBlock : public Stmt
     StmtBlock(List<VarDecl*> *variableDeclarations, List<Stmt*> *statements);
     void CheckStatements();
     void CheckDeclError();
+    Location *Emit();
     Hashtable<Decl*> *GetSymTable() { return sym_table; }
-    Location* Emit();
 };
 
   
@@ -95,7 +101,8 @@ class ForStmt : public LoopStmt
   public:
     ForStmt(Expr *init, Expr *test, Expr *step, Stmt *body);
     void CheckStatements();
-    Location* Emit();
+
+    Location *Emit();
 };
 
 class WhileStmt : public LoopStmt 
@@ -103,7 +110,8 @@ class WhileStmt : public LoopStmt
   public:
     WhileStmt(Expr *test, Stmt *body) : LoopStmt(test, body) {}
     void CheckStatements();
-    Location* Emit();
+
+    Location *Emit();
  };
 
 class IfStmt : public ConditionalStmt 
@@ -115,17 +123,20 @@ class IfStmt : public ConditionalStmt
     IfStmt(Expr *test, Stmt *thenBody, Stmt *elseBody);
     void CheckStatements();
     void CheckDeclError();
-    Location* Emit();
+
+    Location *Emit();
 };
 
 class BreakStmt : public Stmt 
 {
-protected:
+  protected:
     Stmt *enclos; // enclosing while/for/switch
+
   public:
     BreakStmt(yyltype loc) : Stmt(loc) {}
     void CheckStatements();
-    Location* Emit();
+
+    Location *Emit();
 };
 
 class ReturnStmt : public Stmt  
@@ -136,7 +147,8 @@ class ReturnStmt : public Stmt
   public:
     ReturnStmt(yyltype loc, Expr *expr);
     void CheckStatements();
-    Location* Emit();
+
+    Location *Emit();
 };
 
 class PrintStmt : public Stmt
@@ -147,7 +159,7 @@ class PrintStmt : public Stmt
   public:
     PrintStmt(List<Expr*> *arguments);
     void CheckStatements();
-    Location* Emit();
+    Location *Emit();
 };
 
 
@@ -161,7 +173,8 @@ class DefaultStmt : public Stmt
     DefaultStmt(List<Stmt*> *sts);
     void CheckStatements();
     void CheckDeclError();
-    Location* Emit();
+
+    Location *Emit();
 };
 
 
@@ -186,7 +199,8 @@ class SwitchStmt : public Stmt
     SwitchStmt(Expr *e, List<CaseStmt*> *cs, DefaultStmt *ds);
     void CheckStatements();
     void CheckDeclError();
-    Location* Emit();
+
+    Location *Emit();
 };
 
 

@@ -3,7 +3,7 @@
  * This file defines the main() routine for the program and not much else.
  * You should not need to modify this file.
  */
- 
+
 #include <string.h>
 #include <stdio.h>
 #include "utility.h"

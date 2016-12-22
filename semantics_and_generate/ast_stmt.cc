@@ -12,7 +12,10 @@
 #include "codegen.h"
 #include "errors.h"
 
-Hashtable<Decl*> *Program::sym_table  = new Hashtable<Decl*>;
+Hashtable<Decl*> *Program::sym_table  = new Hashtable<Decl*>();
+CodeGenerator *Program::cg = new CodeGenerator();
+int Program::offset = CodeGenerator::OffsetToFirstGlobal;
+string Program::prefix = "__";
 
 Program::Program(List<Decl*> *d) {
   Assert(d != NULL);
@@ -41,58 +44,63 @@ void Program::CheckDeclError() {
 		sym_table->Enter(name, cur);
 	    }
 	}
+
+      // now traverse down the tree and search for declaration errors in local scope(class scope)
       for (int i = 0; i < this->decls->NumElements(); i++)
 	this->decls->Nth(i)->CheckDeclError();
-      // all the declarations should be added to hashtables of their scopes
+      // all the declarations should be added to hashtables of their scopes now
     }
+
 }
 
-Location* Program::Emit()
-{
-  for(int i = 0; i < this->decls->NumElements(); i++)
+Location *Program::Emit() {
+  for (int i = 0; i < this->decls->NumElements(); i++)
     this->decls->Nth(i)->SetLabels();
 
   Decl *main_decl = NULL;
-  for (int j = 0; j < this->decls->NumElements(); ++j) {
-    Decl *decl = this->decls->Nth(j);
-    if (!strcmp(decl->GetID()->GetName(), "main"))
+  for (int i = 0; i < this->decls->NumElements(); i++)
+    {
+      Decl *decl = this->decls->Nth(i);
+      if (!strcmp(decl->GetID()->GetName(), "main"))
         main_decl = decl;
-    else
+      else
         decl->Emit();
-  }
-    if (main_decl)
-        main_decl->Emit();
-    Program::cg->DoFinalCodeGen();
+    }
+  if (main_decl)
+    main_decl->Emit();
 
-    if (Program::sym_table->Lookup("main") == NULL)
-        ReportError::NoMainFound();
-    return NULL;
+  Program::cg->DoFinalCodeGen();
+
+  if (Program::sym_table->Lookup("main") == NULL)
+    ReportError::NoMainFound();
+
+  return NULL;
 }
 
 void Program::PrintError(const char *error_msg, FnDecl *fndecl) {
-    if (fndecl)
+  if (fndecl)
     {
-        int localOffset = fndecl->UpdateFrame();
-        Location *error = Program::cg->GenLoadConstant(error_msg, localOffset);
+      int localOffset = fndecl->UpdateFrame();
+      Location *error = Program::cg->GenLoadConstant(error_msg, localOffset);
 
-        Program::cg->GenBuiltInCall(PrintString, error);
+      Program::cg->GenBuiltInCall(PrintString, error);
 
-        Program::cg->GenBuiltInCall(Halt);
+      Program::cg->GenBuiltInCall(Halt);
     }
 }
 
-string Program::GetClassLabel(const char *classname, const char *name)
-{
-    string label = Program::prefix + classname + "." +name;
-    return label;
+
+
+string Program::GetClassLabel(const char *classname, const char *name) {
+  string label = Program::prefix + classname + "." + name;
+  return label;
 }
 
 string Program::GetFuncLabel(const char *name) {
-    string label = Program::prefix + name;
-    return label;
+  string label = Program::prefix + name;
+  return label;
 }
 
-//TODO StmtBlock Emit and so on
 StmtBlock::StmtBlock(List<VarDecl*> *d, List<Stmt*> *s) {
   Assert(d != NULL && s != NULL);
   (this->decls=d)->SetParentAll(this);
@@ -144,18 +152,18 @@ void StmtBlock::CheckDeclError() {
 }
 
 Location *StmtBlock::Emit() {
-    if (this->decls)
+  if (this->decls)
     {
-        for (int i = 0; i < this->decls->NumElements(); i++)
-            this->decls->Nth(i)->Emit();
+      for (int i = 0; i < this->decls->NumElements(); i++)
+        this->decls->Nth(i)->Emit();
     }
-    if (this->stmts)
+  if (this->stmts)
     {
-        for (int i = 0; i < this->stmts->NumElements(); i++)
-            this->stmts->Nth(i)->Emit();
+      for (int i = 0; i < this->stmts->NumElements(); i++)
+        this->stmts->Nth(i)->Emit();
     }
 
-    return NULL;
+  return NULL;
 }
 
 ConditionalStmt::ConditionalStmt(Expr *t, Stmt *b) { 
@@ -181,7 +189,7 @@ ForStmt::ForStmt(Expr *i, Expr *t, Expr *s, Stmt *b): LoopStmt(t, b) {
   (this->init=i)->SetParent(this);
   (this->step=s)->SetParent(this);
 }
-//TODO ForStmt&WhileStmt&so on Emit
+
 void ForStmt::CheckStatements() {
   if (this->init)
     this->init->CheckStatements();
@@ -191,32 +199,32 @@ void ForStmt::CheckStatements() {
 }
 
 Location *ForStmt::Emit() {
-    if (this->test)
+  if (this->test)
     {
-        if (this->init)
-            this->init->Emit();
+      if (this->init)
+        this->init->Emit();
 
-        char *label_0 = Program::cg->NewLabel();
-        char *label_1 = Program::cg->NewLabel();
+      char *label_0 = Program::cg->NewLabel();
+      char *label_1 = Program::cg->NewLabel();
 
-        this->next = label_1;
+      this->next = label_1;
 
-        Program::cg->GenLabel(label_0);
+      Program::cg->GenLabel(label_0);
 
-        Program::cg->GenIfZ(this->test->Emit(), label_1);
+      Program::cg->GenIfZ(this->test->Emit(), label_1);
 
-        if (this->body)
-            this->body->Emit();
+      if (this->body)
+        this->body->Emit();
 
-        if (this->step)
-            this->step->Emit();
+      if (this->step)
+        this->step->Emit();
 
-        Program::cg->GenGoto(label_0);
+      Program::cg->GenGoto(label_0);
 
-        Program::cg->GenLabel(label_1);
+      Program::cg->GenLabel(label_1);
     }
 
-    return NULL;
+  return NULL;
 }
 
 void WhileStmt::CheckStatements() {
@@ -224,29 +232,29 @@ void WhileStmt::CheckStatements() {
 }
 
 Location *WhileStmt::Emit() {
-    if (this->test)
+  if (this->test)
     {
-        char *label_0 = Program::cg->NewLabel();
-        char *label_1 = Program::cg->NewLabel();
+      char *label_0 = Program::cg->NewLabel();
+      char *label_1 = Program::cg->NewLabel();
 
-        this->next = label_1;
+      this->next = label_1;
 
-        Program::cg->GenLabel(label_0);
+      Program::cg->GenLabel(label_0);
 
-        Program::cg->GenIfZ(this->test->Emit(), label_1);
+      Program::cg->GenIfZ(this->test->Emit(), label_1);
 
-        if (this->body)
-            this->body->Emit();
+      if (this->body)
+        this->body->Emit();
 
 
-        Program::cg->GenGoto(label_0);
+      Program::cg->GenGoto(label_0);
 
-        Program::cg->GenLabel(label_1);
+      Program::cg->GenLabel(label_1);
 
 
     }
 
-    return NULL;
+  return NULL;
 }
 
 IfStmt::IfStmt(Expr *t, Stmt *tb, Stmt *eb): ConditionalStmt(t, tb) { 
@@ -268,24 +276,24 @@ void IfStmt::CheckStatements() {
 }
 
 Location *IfStmt::Emit() {
-    if (this->test)
+  if (this->test)
     {
-        char *label_0 = Program::cg->NewLabel();
-        char *label_1 = Program::cg->NewLabel();
-        Program::cg->GenIfZ(this->test->Emit(), label_0);
-        if (this->body)
-            this->body->Emit();
+      char *label_0 = Program::cg->NewLabel();
+      char *label_1 = Program::cg->NewLabel();
+      Program::cg->GenIfZ(this->test->Emit(), label_0);
+      if (this->body)
+        this->body->Emit();
 
-        Program::cg->GenGoto(label_1);
-        Program::cg->GenLabel(label_0);
+      Program::cg->GenGoto(label_1);
+      Program::cg->GenLabel(label_0);
 
-        if (this->elseBody)
-            this->elseBody->Emit();
+      if (this->elseBody)
+        this->elseBody->Emit();
 
-        Program::cg->GenLabel(label_1);
+      Program::cg->GenLabel(label_1);
     }
 
-    return NULL;
+  return NULL;
 }
 
 void BreakStmt::CheckStatements() {
@@ -295,29 +303,23 @@ void BreakStmt::CheckStatements() {
       if ((typeid(*parent) == typeid(WhileStmt)) ||
           (typeid(*parent) == typeid(ForStmt)) ||
           (typeid(*parent) == typeid(SwitchStmt)))
-        return;
+        {
+          this->enclos = dynamic_cast<Stmt*>(parent);
+          return;
+        }
       parent = parent->GetParent();
     }
   ReportError::BreakOutsideLoop(this);
 }
 
 Location *BreakStmt::Emit() {
-    Program::cg->GenGoto(this->enclos->next);
-    return NULL;
+  Program::cg->GenGoto(this->enclos->next);
+  return NULL;
 }
 
 ReturnStmt::ReturnStmt(yyltype loc, Expr *e) : Stmt(loc) { 
   Assert(e != NULL);
   (expr=e)->SetParent(this);
-}
-
-Location *ReturnStmt::Emit() {
-    if (this->expr)
-        Program::cg->GenReturn(this->expr->Emit());
-    else
-        Program::cg->GenReturn(NULL);
-
-    return NULL;
 }
 
 void ReturnStmt::CheckStatements() {
@@ -360,7 +362,16 @@ void ReturnStmt::CheckStatements() {
         }
     }
   else if (strcmp("void", expected))
-    ReportError::ReturnMismatch(this, new Type("void"), new Type(expected));
+    ReportError::ReturnMismatch(this, Type::voidType, new Type(expected));
+}
+
+Location *ReturnStmt::Emit() {
+  if (this->expr)
+    Program::cg->GenReturn(this->expr->Emit());
+  else
+    Program::cg->GenReturn(NULL);
+
+  return NULL;
 }
   
 PrintStmt::PrintStmt(List<Expr*> *a) {    
@@ -375,31 +386,32 @@ void PrintStmt::CheckStatements() {
         {
           Expr *expr = this->args->Nth(i);
           expr->CheckStatements();
-          const char *typeName = expr->GetTypeName();
-          if (typeName && strcmp(typeName, "string") && strcmp(typeName, "int") && strcmp(typeName, "bool"))
-            ReportError::PrintArgMismatch(expr, (i+1), new Type(typeName));
+
+          Type *type = expr->GetType();
+          if (type && type != Type::stringType && type != Type::intType && type != Type::boolType)
+            ReportError::PrintArgMismatch(expr, (i+1), type);
         }
     }
 }
 
 Location *PrintStmt::Emit() {
-    if (this->args)
+  if (this->args)
     {
-        for (int i = 0; i < this->args->NumElements(); i++)
+      for (int i = 0; i < this->args->NumElements(); i++)
         {
-            Expr *expr = this->args->Nth(i);
+          Expr *expr = this->args->Nth(i);
 
-            Type *type = expr->GetType();
-            if (type == Type::intType)
-                Program::cg->GenBuiltInCall(PrintInt, expr->Emit());
-            else if (type == Type::stringType)
-                Program::cg->GenBuiltInCall(PrintString, expr->Emit());
-            else if (type == Type::boolType)
-                Program::cg->GenBuiltInCall(PrintBool, expr->Emit());
+          Type *type = expr->GetType();
+          if (type == Type::intType)
+            Program::cg->GenBuiltInCall(PrintInt, expr->Emit());
+          else if (type == Type::stringType)
+            Program::cg->GenBuiltInCall(PrintString, expr->Emit());
+          else if (type == Type::boolType)
+            Program::cg->GenBuiltInCall(PrintBool, expr->Emit());
         }
     }
 
-    return NULL;
+  return NULL;
 }
 
 CaseStmt::CaseStmt(IntConstant *ic, List<Stmt*> *sts)
@@ -434,12 +446,12 @@ void DefaultStmt::CheckDeclError() {
 }
 
 Location *DefaultStmt::Emit() {
-    if (stmts)
+  if (stmts)
     {
-        for (int i = 0; i < stmts->NumElements(); i++)
-            stmts->Nth(i)->Emit();
+      for (int i = 0; i < stmts->NumElements(); i++)
+        stmts->Nth(i)->Emit();
     }
-    return NULL;
+  return NULL;
 }
 
 SwitchStmt::SwitchStmt(Expr *e, List<CaseStmt*> *cs, DefaultStmt *ds) {
@@ -447,7 +459,7 @@ SwitchStmt::SwitchStmt(Expr *e, List<CaseStmt*> *cs, DefaultStmt *ds) {
   (this->expr=e)->SetParent(this);
   (this->cases=cs)->SetParentAll(this);
   if (ds)
-   (this->defaults=ds)->SetParent(this);
+    (this->defaults=ds)->SetParent(this);
 }
 
 void SwitchStmt::CheckStatements() {
@@ -482,56 +494,55 @@ void SwitchStmt::CheckDeclError() {
 }
 
 Location *SwitchStmt::Emit() {
-    if (this->expr)
+  if (this->expr)
     {
-        int num = cases->NumElements();
-        char *labels[num];
+      int num = cases->NumElements();
+      char *labels[num];
 
-        for (int i = 0; i < 2 * num + 2; i++)
-            labels[i] = Program::cg->NewLabel();
+      for (int i = 0; i < 2 * num + 2; i++)
+        labels[i] = Program::cg->NewLabel();
 
-        // label for break
-        this->next = labels[2 * num + 1];
+      // label for break
+      this->next = labels[2 * num + 1];
 
-        // tests from case0 to case(n-1)
-        for (int i = 0; i < num; i++)
+      // tests from case0 to case(n-1)
+      for (int i = 0; i < num; i++)
         {
-            FnDecl *fndecl = this->GetEnclosFunc(this);
-            if (fndecl)
+          FnDecl *fndecl = this->GetEnclosFunc(this);
+          if (fndecl)
             {
-                int localOffset = fndecl->UpdateFrame();
-                Location *test = Program::cg->GenBinaryOp("==", this->expr->Emit(), this->cases->Nth(i)->GetLabel()->Emit(), localOffset);
+	      int localOffset = fndecl->UpdateFrame();
+	      Location *test = Program::cg->GenBinaryOp("==", this->expr->Emit(), this->cases->Nth(i)->GetLabel()->Emit(), localOffset);
+		
+              if (i > 0)
+	        Program::cg->GenLabel(labels[i - 1]);
 
-                if (i > 0)
-                    Program::cg->GenLabel(labels[i - 1]);
-
-                if (test)
-                {
-                    Program::cg->GenIfZ(test, labels[i]);
-                    Program::cg->GenGoto(labels[num + i]);
-                }
+	      if (test)
+		{
+		  Program::cg->GenIfZ(test, labels[i]);
+		  Program::cg->GenGoto(labels[num + i]);
+		}
             }
         }
 
-        // goto default
-        Program::cg->GenLabel(labels[num - 1]);
-        Program::cg->GenGoto(labels[num * 2]);
+      // goto default
+      Program::cg->GenLabel(labels[num - 1]);
+      Program::cg->GenGoto(labels[num * 2]);
 
-        // bodies from case0 to case(n-1)
-        for (int i = 0; i < num; i++)
+      // bodies from case0 to case(n-1)
+      for (int i = 0; i < num; i++)
         {
-            Program::cg->GenLabel(labels[num + i]);
-            this->cases->Nth(i)->Emit();
+          Program::cg->GenLabel(labels[num + i]);
+          this->cases->Nth(i)->Emit();
         }
 
-        // body of default
-        Program::cg->GenLabel(labels[num * 2]);
-        if (this->defaults)
-            this->defaults->Emit();
+      // body of default
+      Program::cg->GenLabel(labels[num * 2]);
+      if (this->defaults)
+        this->defaults->Emit();
 
-        Program::cg->GenLabel(labels[num * 2 + 1]);
+      Program::cg->GenLabel(labels[num * 2 + 1]);
     }
 
-    return NULL;
+  return NULL;
 }
-
