@@ -20,10 +20,10 @@
  * set up links in both directions. The parent link is typically not used 
  * during parsing, but is more important in later phases.
  *
- * Semantic analysis: For pp3 you are adding "Check" behavior to the ast
- * node classes. Your semantic analyzer should do an inorder walk on the
- * parse tree, and when visiting each node, verify the particular
- * semantic rules that apply to that construct.
+ * Code generation: For pp4 you are adding "Emit" behavior to the ast
+ * node classes. Your code generator should do an postorder walk on the
+ * parse tree, and when visiting each node, emitting the necessary
+ * instructions for that construct.
 
  */
 
@@ -38,65 +38,54 @@
 #include "hashtable.h"
 #include "list.h"
 #include "location.h"
-#include "sparsepp.h"
-#include "errors.h"
-#include "list.h"
-
-using spp::sparse_hash_map;
 
 class Decl;
+class FnDecl;
+class ClassDecl;
+class Location;
 
 class Node  {
- protected:
-  yyltype *location;
-  Node *parent;
+protected:
+    yyltype *location;
+    Node *parent;
 
- public:
-  Node(yyltype loc);
-  Node();
-  virtual ~Node() {}
-    
-  yyltype *GetLocation()   { return location; }
-  void SetParent(Node *p)  { parent = p; }
-  Node *GetParent()        { return parent; }
+public:
+    Node(yyltype loc);
+    Node();
+    virtual ~Node() {}
 
-<<<<<<< HEAD
-  virtual void CheckDeclError() {}
-  virtual void CheckStatements() {}
-  virtual Hashtable<Decl*> *GetSymTable() { return NULL; }
-=======
-    virtual const char *GetPrintNameForNode() = 0;
-    
+    yyltype *GetLocation()   { return location; }
+    void SetParent(Node *p)  { parent = p; }
+    Node *GetParent()        { return parent; }
+
+    virtual Hashtable<Decl*> *GetSymTable() { return NULL; }
+
     virtual void CheckDeclError() {}
-    virtual void CheckStatementsError() {}
-    //virtual sparse_hash_map<Decl*> *GetSymTable() {return NULL;}
-    // Print() is deliberately _not_ virtual
-    // subclasses should override PrintChildren() instead
-    void Print(int indentLevel, const char *label = NULL); 
-    virtual void PrintChildren(int indentLevel)  {}
->>>>>>> f1924cde196d558e91d8cc331e0a2a5b9a4357f3
-};
-   
+    virtual void CheckStatements() {}
+    virtual Location *Emit() { return NULL; }
 
-class Identifier : public Node 
+    // get enclosing function to backpatch the frame size
+    FnDecl *GetEnclosFunc(Node *node);
+    // for methods
+    ClassDecl *GetEnclosClass(Node *node);
+};
+
+
+class Identifier : public Node
 {
- protected:
-  char *name;
-    
-<<<<<<< HEAD
- public:
-  Identifier(yyltype loc, const char *name);
-  const char *GetName() { return name; }
-  Decl *CheckIdDecl();
-  Decl *CheckIdDecl(Hashtable<Decl*> *sym_table, const char *name);
-  friend ostream& operator<<(ostream& out, Identifier *id) { if (id) return out << id->name; else return out;}
-=======
-  public:
+protected:
+    char *name;
+    Location *memLoc;
+
+public:
     Identifier(yyltype loc, const char *name);
-    const char *GetPrintNameForNode()   { return "Identifier"; }
-    void PrintChildren(int indentLevel);
     const char *GetName() { return name; }
->>>>>>> f1924cde196d558e91d8cc331e0a2a5b9a4357f3
+    Decl *CheckIdDecl();
+    Decl *CheckIdDecl(Hashtable<Decl*> *sym_table, const char *name);
+    friend ostream& operator<<(ostream& out, Identifier *id) { if (id) return out << id->name; else return out;}
+
+    Location *GetMemLoc() { return memLoc; }
+    void SetMemLoc(Location *loc) { memLoc = loc; }
 };
 
 
@@ -107,8 +96,8 @@ class Identifier : public Node
 // when your parser can continue after an error.
 class Error : public Node
 {
- public:
- Error() : Node() {}
+public:
+    Error() : Node() {}
 };
 
 #endif

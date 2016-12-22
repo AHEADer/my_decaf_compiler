@@ -16,7 +16,8 @@
 #include "ast.h"
 #include "hashtable.h"
 #include "list.h"
-
+#include "tac.h"
+#include "codegen.h"
 
 class Decl;
 class VarDecl;
@@ -25,14 +26,21 @@ class IntConstant;
 
 class Program : public Node
 {
-  protected:
-     List<Decl*> *decls;
+protected:
+    List<Decl*> *decls;
 
-  public:
-     Program(List<Decl*> *declList);
-     void CheckStatements();
-     void CheckDeclError();
-     static Hashtable<Decl*> *sym_table; // global symbol table
+public:
+    Program(List<Decl*> *declList);
+    void CheckStatements();
+    void CheckDeclError();
+    static Hashtable<Decl*> *sym_table; // global symbol table
+    Location *Emit();
+    static void PrintError(const char *error_msg, FnDecl *fndecl);
+    static string GetClassLabel(const char* classname, const char* name);
+    static string GetFuncLabel(const char* name);
+    static CodeGenerator *cg;
+    static int offset;  //to set global variable offset
+    static string prefix;
 };
 
 class Stmt : public Node
@@ -40,6 +48,7 @@ class Stmt : public Node
   public:
      Stmt() : Node() {}
      Stmt(yyltype loc) : Node(loc) {}
+    char* next;
 };
 
 class StmtBlock : public Stmt 
@@ -55,6 +64,7 @@ class StmtBlock : public Stmt
     void CheckStatements();
     void CheckDeclError();
     Hashtable<Decl*> *GetSymTable() { return sym_table; }
+    Location* Emit();
 };
 
   
@@ -85,6 +95,7 @@ class ForStmt : public LoopStmt
   public:
     ForStmt(Expr *init, Expr *test, Expr *step, Stmt *body);
     void CheckStatements();
+    Location* Emit();
 };
 
 class WhileStmt : public LoopStmt 
@@ -92,6 +103,7 @@ class WhileStmt : public LoopStmt
   public:
     WhileStmt(Expr *test, Stmt *body) : LoopStmt(test, body) {}
     void CheckStatements();
+    Location* Emit();
  };
 
 class IfStmt : public ConditionalStmt 
@@ -103,13 +115,17 @@ class IfStmt : public ConditionalStmt
     IfStmt(Expr *test, Stmt *thenBody, Stmt *elseBody);
     void CheckStatements();
     void CheckDeclError();
+    Location* Emit();
 };
 
 class BreakStmt : public Stmt 
 {
+protected:
+    Stmt *enclos; // enclosing while/for/switch
   public:
     BreakStmt(yyltype loc) : Stmt(loc) {}
     void CheckStatements();
+    Location* Emit();
 };
 
 class ReturnStmt : public Stmt  
@@ -120,6 +136,7 @@ class ReturnStmt : public Stmt
   public:
     ReturnStmt(yyltype loc, Expr *expr);
     void CheckStatements();
+    Location* Emit();
 };
 
 class PrintStmt : public Stmt
@@ -130,6 +147,7 @@ class PrintStmt : public Stmt
   public:
     PrintStmt(List<Expr*> *arguments);
     void CheckStatements();
+    Location* Emit();
 };
 
 
@@ -143,6 +161,7 @@ class DefaultStmt : public Stmt
     DefaultStmt(List<Stmt*> *sts);
     void CheckStatements();
     void CheckDeclError();
+    Location* Emit();
 };
 
 
@@ -153,6 +172,7 @@ class CaseStmt : public DefaultStmt
 
   public:
     CaseStmt(IntConstant *ic, List<Stmt*> *sts);
+    IntConstant *GetLabel() { return intconst; }
 };
 
 class SwitchStmt : public Stmt
@@ -166,6 +186,7 @@ class SwitchStmt : public Stmt
     SwitchStmt(Expr *e, List<CaseStmt*> *cs, DefaultStmt *ds);
     void CheckStatements();
     void CheckDeclError();
+    Location* Emit();
 };
 
 

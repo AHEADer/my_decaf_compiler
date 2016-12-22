@@ -188,7 +188,7 @@ void Mips::Emit(const char* fmt, ...)
  * a register (using GetRegister above) and then emits an li (load
  * immediate) instruction with the constant value.
  */
-void Mips::EmitLoadConst(Location *dst, int val)
+void Mips::EmitLoadConstant(Location *dst, int val)
 {
     Register reg = GetRegisterForWrite(dst);
     //li instruction save a immediate number to a register
@@ -249,13 +249,12 @@ void Mips::EmitStore(Location *reference, Location *value, int offset)
          offset, regs[rRef].name);
 }
 
-//TODO
 void Mips::EmitBinaryOp(BinaryOp::OpCode code, Location *dst,
                         Location *op1, Location *op2)
 {
     Register rLeft = GetRegister(op1), rRight = GetRegister(op2, rLeft);
     Register rDst = GetRegisterForWrite(dst, rLeft, rRight);
-    Emit("%s %s, %s, %s\t");
+    Emit("%s %s, %s, %s\t", NameForTac(code), regs[rDst].name, regs[rLeft].name, regs[rRight].name);
 }
 
 /* Method: EmitLabel
@@ -333,9 +332,290 @@ void Mips::EmitLCall(Location *result, const char *label)
     EmitCallInstr(result, label, true);
 }
 
+void Mips::EmitACall(Location *result, Location *fnAddr)
+{
+    EmitCallInstr(result, regs[GetRegister(fnAddr)].name, false);
+}
 
+void Mips::EmitPopParams(int bytes)
+{
+    if (bytes != 0)
+        Emit("add $sp, $sp, %d\t# pop params off stack", bytes);
+}
 
+void Mips::EmitReturn(Location *returnVal)
+{
+    if (returnVal != NULL)
+        Emit("move $v0, %s\t\t# assign return value into $v0",
+        regs[GetRegister(returnVal)].name);
 
+    SpillForEndFunction();
+    Emit("move $sp, $fp\t\t# pop callee frame off stack");
+    Emit("lw $ra, -4($fp)\t# restore saved ra");
+    Emit("lw $fp, 0($fp)\t# restore saved fp");
+    Emit("jr $ra\t\t# return from current function");
+}
+
+void Mips::EmitBeginFunction(int frameSize)
+{
+    Assert(frameSize >= 0);
+    Emit("subu $sp, $sp, 8\t# decrement sp to make space to save ra, fp");
+    Emit("sw $fp, 8($sp)\t# save fp");
+    Emit("sw $ra, 4($sp)\t# save ra");
+    Emit("addiu $fp, $sp, 8\t# set up new fp");
+    if (stackFrameSize != 0)
+        Emit("subu $sp, $sp, %d\t# decrement sp to make space for locals/temps",
+             stackFrameSize);
+}
+
+void Mips::EmitEndFunction()
+{
+    Emit("# (below handles reaching end of fn body with no explicit return)");
+    EmitReturn(NULL);
+}
+
+void Mips::EmitVTable(const char *label, List<const char *> *methodLabels)
+{
+    Emit(".data");
+    Emit(".align 2");
+    Emit("%s:\t\t# label for class %s vtable", label, label);
+    for (int i = 0; i < methodLabels->NumElements(); i++)
+        Emit(".word %s\n", methodLabels->Nth(i));
+    Emit(".text");
+
+}
+
+void Mips::EmitPreamble()
+{
+    Emit("# standard Decaf preamble ");
+    EmitData();
+    Emit(".text");
+    Emit(".align 2");
+    Emit(".globl main");
+    Emit(".globl _PrintInt");
+    Emit(".globl _PrintString");
+    Emit(".globl _PrintBool");
+    Emit(".globl _Alloc");
+    Emit(".globl _StringEqual");
+    Emit(".globl _Halt");
+    Emit(".globl _ReadInteger");
+    Emit(".globl _ReadLine");
+    Emit("");
+}
+
+void Mips::EmitPrintInt()
+{
+    Emit("%s:", "_PrintInt");
+    Emit("subu $sp, $sp, 8\t# decrement so to make space to save ra, fp");
+    Emit("sw $fp, 8($sp)  \t# save fp");
+    Emit("sw $ra, 4($sp)  \t# save ra");
+    Emit("addiu $fp, $sp, 8\t# set up new fp");
+    Emit("li $v0, 1       \t# system call code for print_int");
+    Emit("lw $a0, 4($fp)");
+    Emit("syscall");
+    Emit("move $sp, $fp");
+    Emit("lw $ra, -4($fp)");
+    Emit("lw $fp, 0($fp)");
+    Emit("jr $ra");
+    Emit("\n");
+}
+
+void Mips::EmitPrintString()
+{
+    Emit("%s:", "_PrintString");
+    Emit("subu $sp, $sp, 8");
+    Emit("sw $fp, 8($sp)");
+    Emit("sw $ra, 4($sp)");
+    Emit("addiu $fp, $sp, 8");
+    Emit("li $v0, 4       \t# system call for print_str");
+    Emit("lw $a0, 4($fp)");
+    Emit("syscall");
+    Emit("move $sp, $fp");
+    Emit("lw $ra, -4($fp)");
+    Emit("lw $fp, 0($fp)");
+    Emit("jr $ra");
+    Emit("\n");
+}
+
+void Mips::EmitPrintBool()
+{
+    Emit("%s:", "_PrintBool");
+    Emit("subu $sp, $sp, 8");
+    Emit("sw $fp, 8($sp)");
+    Emit("sw $ra, 4($sp)");
+    Emit("addiu $fp, $sp, 8");
+    Emit("lw $t1, 4($fp)");
+    Emit("blez $t1, fbr");
+    Emit("li $v0, 4       \t# system call for print_str");
+    Emit("la $a0, TRUE");
+    Emit("syscall");
+    Emit("b end");
+    Emit("%s:", "fbr");
+    Emit("li $v0, 4       \t# system call for print_str");
+    Emit("la $a0, FALSE");
+    Emit("syscall");
+    Emit("%s:", "end");
+    Emit("move $sp, $fp");
+    Emit("lw $ra, -4($fp)");
+    Emit("lw $fp, 0($fp)");
+    Emit("jr $ra");
+    Emit("\n");
+}
+
+void Mips::EmitAlloc()
+{
+    Emit("%s:", "_Alloc");
+    Emit("subu $sp, $sp, 8");
+    Emit("sw $fp, 8($sp)");
+    Emit("sw $ra, 4($sp)");
+    Emit("addiu $fp, $sp, 8");
+    Emit("li $v0, 9       \t# system call for sbrk");
+    Emit("lw $a0, 4($fp)");
+    Emit("syscall");
+    Emit("move $sp, $fp");
+    Emit("lw $ra, -4($fp)");
+    Emit("lw $fp, 0($fp)");
+    Emit("jr $ra");
+    Emit("\n");
+}
+
+void Mips::EmitStringEqual()
+{
+    Emit("%s:", "_StringEqual");
+    Emit("subu $sp, $sp, 8");
+    Emit("sw $fp, 8($sp)");
+    Emit("sw $ra, 4($sp)");
+    Emit("addiu $fp, $sp, 8");
+    Emit("subu $sp, $sp, 4\t# decrement sp to make space for return value");
+    Emit("li $v0, 0");
+    Emit("#Determine length string 1");
+    Emit("lw $t0, 4($fp)");
+    Emit("li $t3, 0");
+    Emit("%s:", "bloop1");
+    Emit("lb $t5, ($t0)");
+    Emit("beqz $t5, eloop1");
+    Emit("addi $t0, 1");
+    Emit("addi $t3, 1");
+    Emit("b bloop1");
+    Emit("%s:", "eloop1");
+    Emit("#Determine length string 2");
+    Emit("lw $t1, 8($fp)");
+    Emit("li $t4, 0");
+    Emit("%s:", "bloop2");
+    Emit("lb $t5, ($t1)");
+    Emit("beqz $t5, eloop2");
+    Emit("addi $t1, 1");
+    Emit("addi $t4, 1");
+    Emit("b bloop2");
+    Emit("%s:", "eloop2");
+    Emit("bne $t3, $t4, end1\t# check if string lengths are the same");
+    Emit("lw $t0, 4($fp)");
+    Emit("lw $t1, 8($fp)");
+    Emit("li $t3, 0");
+    Emit("%s:", "bloop3");
+    Emit("lb $t5, ($t0)");
+    Emit("lb $t6, ($t1)");
+    Emit("bne $t5, $t6, end1");
+    Emit("addi $t3, 1");
+    Emit("addi $t0, 1");
+    Emit("addi $t1, 1");
+    Emit("bne $t3, $t4, bloop3");
+    Emit("%s:", "eloop3");
+    Emit("li $v0, 1");
+    Emit("%s:", "end1");
+    Emit("move $sp, $fp");
+    Emit("lw $ra, -4($fp)");
+    Emit("lw $fp, 0($fp)");
+    Emit("jr $ra");
+    Emit("\n");
+}
+
+void Mips::EmitHalt()
+{
+    Emit("%s:", "_Halt");
+    Emit("li $v0, 10");
+    Emit("syscall");
+    Emit("\n");
+}
+
+void Mips::EmitReadInteger()
+{
+    Emit("%s:", "_ReadInteger");
+    Emit("subu $sp, $sp, 8");
+    Emit("sw $fp, 8($sp)");
+    Emit("sw $ra, 4($sp)");
+    Emit("addiu $fp, $sp, 8");
+    Emit("subu $sp, $sp, 4");
+    Emit("li $v0, 5");
+    Emit("syscall");
+    Emit("move $sp, $fp");
+    Emit("lw $ra, -4($fp)");
+    Emit("lw $fp, 0($fp)");
+    Emit("jr $ra");
+    Emit("\n");
+}
+
+void Mips::EmitReadLine()
+{
+    Emit("%s:", "_ReadLine");
+    Emit("subu $sp, $sp, 8");
+    Emit("sw $fp, 8($sp)");
+    Emit("sw $ra, 4($sp)");
+    Emit("addiu $fp, $sp, 8");
+    Emit("li $t0, 40");
+    Emit("subu $sp, $sp, 4");
+    Emit("sw $t0, 4($sp)");
+    Emit("jal _Alloc");
+    Emit("move $t0, $v0");
+    Emit("li $a1, 40");
+    Emit("move $a0, $t0");
+    Emit("li $v0, 8");
+    Emit("syscall");
+    Emit("move $t1, $t0");
+    Emit("%s:", "bloop4");
+    Emit("lb $t5, ($t1)");
+    Emit("beqz $t5, eloop4");
+    Emit("addi $t1, 1");
+    Emit("b bloop4");
+    Emit("%s:", "eloop4");
+    Emit("addi $t1, -1"); // erase newline
+    Emit("li $t6, 0");
+    Emit("sb $t6, ($t1)");
+    Emit("move $v0, $t0");
+    Emit("move $sp, $fp");
+    Emit("lw $ra, -4($fp)");
+    Emit("lw $fp, 0($fp)");
+    Emit("jr $ra");
+    Emit("\n");
+}
+
+void Mips::EmitData()
+{
+    Emit(".data");
+    Emit("%s:", "TRUE");
+    Emit(".asciiz \"true\"");
+    Emit("%s:", "FALSE");
+    Emit(".asciiz \"false\"");
+    Emit("\n");
+}
+
+void Mips::EmitData()
+{
+    Emit(".data");
+    Emit("%s:", "TRUE");
+    Emit(".asciiz \"true\"");
+    Emit("%s:", "FALSE");
+    Emit(".asciiz \"false\"");
+    Emit("\n");
+}
+
+const char* Mips::NameForTac(BinaryOp::OpCode code)
+{
+    Assert(code >=0 && code < BinaryOp::NumOps);
+    const char* name = mipsName[code];
+    Assert(name!=NULL);
+    return name;
+}
 
 /* Constructor
  * ----------
@@ -386,3 +666,6 @@ Mips::Mips() {
     regs[s7] = (RegContents){false, NULL, "$s7", true};
     lastUsed = zero;
 }
+
+
+const char *Mips::mipsName[BinaryOp::NumOps]

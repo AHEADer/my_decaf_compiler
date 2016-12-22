@@ -12,7 +12,7 @@ private:
         t0, t1, t2, t3, t4, t5, t6, t7,
         s0, s1, s2, s3, s4, s5, s6, s7,
         t8, t9, k0, k1, gp, sp, fp, ra, NumRegs} Register;
-    struct RegContents {
+    struct RegCoRegContents {
         bool isDirty;
         Location *var;
         const char *name;
@@ -40,13 +40,15 @@ private:
 
     void EmitCallInstr(Location *dst, const char *fn, bool isL);
 
+    static const char *mipsName[BinaryOp::NumOps];
+    static const char *NameForTac(BinaryOp::OpCode code);
 
 public:
 
     Mips();
     static void Emit(const char* fmt, ...);
 
-    void EmitLoadConst(Location *dst, int val);
+    void EmitLoadConstant(Location *dst, int val);
     void EmitLoadStringConstant(Location *dst, const char *str);
     void EmitLoadLabel(Location *dst, const char *label);
 
