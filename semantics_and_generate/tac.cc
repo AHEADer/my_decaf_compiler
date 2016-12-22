@@ -3,7 +3,7 @@
 #include <string.h>
 
 Location::Location(Segment seg, int offset, const char *name):
-        variableName(strdup(name)), segment(s), offset(offset){}
+        variableName(strdup(name)), segment(seg), offset(offset){}
 
 void Instruction::Print() {
     printf("\t%s ;\n", printed);
@@ -22,7 +22,7 @@ LoadConstant::LoadConstant(Location *d, int v) :dst(d), val(v)
 }
 
 void LoadConstant::EmitSpecific(Mips *mips) {
-    mips->EmitLoadConst(dst, val);
+    mips->EmitLoadConstant(dst, val);
 }
 
 LoadStringConstant::LoadStringConstant(Location *d, const char *s) : dst(d)
@@ -203,7 +203,7 @@ VTable::VTable(const char *l, List<const char *> *m)
 : methodLabels(m), label(strdup(l))
 {
     Assert(methodLabels!=NULL && label!=NULL);
-    sprintf(printed, "VTable for class %s,"l);
+    sprintf(printed, "VTable for class %s", l);
 }
 
 void VTable::Print() {

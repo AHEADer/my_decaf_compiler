@@ -29,18 +29,38 @@
       <file leaf-file-name="tac.cc" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tac.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
-              <caret line="103" column="22" lean-forward="false" selection-start-line="103" selection-start-column="10" selection-end-line="103" selection-end-column="22" />
+            <state relative-caret-position="3075">
+              <caret line="205" column="45" lean-forward="false" selection-start-line="205" selection-start-column="45" selection-end-line="205" selection-end-column="45" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ast.h" pinned="false" current-in-tab="true">
+      <file leaf-file-name="mips.h" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/mips.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-295">
+              <caret line="14" column="22" lean-forward="false" selection-start-line="14" selection-start-column="22" selection-end-line="14" selection-end-column="22" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="codegen.cpp" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/codegen.cpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="450">
+              <caret line="48" column="1" lean-forward="false" selection-start-line="48" selection-start-column="1" selection-end-line="48" selection-end-column="1" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ast.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ast.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="773">
-              <caret line="80" column="46" lean-forward="true" selection-start-line="80" selection-start-column="46" selection-end-line="80" selection-end-column="46" />
+            <state relative-caret-position="953">
+              <caret line="80" column="46" lean-forward="false" selection-start-line="80" selection-start-column="46" selection-end-line="80" selection-end-column="46" />
               <folding />
             </state>
           </provider>
@@ -49,8 +69,50 @@
       <file leaf-file-name="ast_decl.cc" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ast_decl.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="591">
-              <caret line="436" column="60" lean-forward="false" selection-start-line="436" selection-start-column="60" selection-end-line="436" selection-end-column="60" />
+            <state relative-caret-position="4560">
+              <caret line="304" column="5" lean-forward="false" selection-start-line="304" selection-start-column="5" selection-end-line="304" selection-end-column="5" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ast_stmt.h" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ast_stmt.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="297">
+              <caret line="40" column="28" lean-forward="false" selection-start-line="40" selection-start-column="26" selection-end-line="40" selection-end-column="28" />
+              <folding>
+                <element signature="e#433#449#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ast_stmt.cc" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/ast_stmt.cc">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="297">
+              <caret line="198" column="35" lean-forward="false" selection-start-line="198" selection-start-column="33" selection-end-line="198" selection-end-column="35" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="codegen.h" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/codegen.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="2235">
+              <caret line="149" column="30" lean-forward="false" selection-start-line="149" selection-start-column="29" selection-end-line="149" selection-end-column="30" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ast_decl.h" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ast_decl.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="365">
+              <caret line="56" column="27" lean-forward="false" selection-start-line="56" selection-start-column="27" selection-end-line="56" selection-end-column="27" />
               <folding />
             </state>
           </provider>
@@ -70,10 +132,13 @@
       <find>EmitBinaryOp</find>
       <find>VarSize</find>
       <find>NameForTac</find>
-      <find>SetMemLoc</find>
       <find>class CaseStmt</find>
       <find>BeginFunc</find>
       <find>BinaryOp(</find>
+      <find>SetMemLoc</find>
+      <find>Program</find>
+      <find>ClassDecl::Emit()</find>
+      <find>cg</find>
     </findStrings>
   </component>
   <component name="IdeDocumentHistory">
@@ -81,13 +146,8 @@
       <list>
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/tac.h" />
-        <option value="$PROJECT_DIR$/tac.cc" />
         <option value="$PROJECT_DIR$/codegen.h" />
-        <option value="$PROJECT_DIR$/mips.h" />
-        <option value="$PROJECT_DIR$/mips.cc" />
-        <option value="$PROJECT_DIR$/codegen.cpp" />
         <option value="$PROJECT_DIR$/ast.h" />
-        <option value="$PROJECT_DIR$/ast_decl.h" />
         <option value="$PROJECT_DIR$/ast_type.h" />
         <option value="$PROJECT_DIR$/ast_expr.h" />
         <option value="$PROJECT_DIR$/ast_type.cc" />
@@ -96,8 +156,13 @@
         <option value="$PROJECT_DIR$/ast_expr.cc" />
         <option value="$PROJECT_DIR$/ast_stmt.cc" />
         <option value="$PROJECT_DIR$/Makefile" />
-        <option value="$PROJECT_DIR$/ast_decl.cc" />
         <option value="$PROJECT_DIR$/ast_stmt.h" />
+        <option value="$PROJECT_DIR$/codegen.cpp" />
+        <option value="$PROJECT_DIR$/tac.cc" />
+        <option value="$PROJECT_DIR$/mips.h" />
+        <option value="$PROJECT_DIR$/mips.cc" />
+        <option value="$PROJECT_DIR$/ast_decl.cc" />
+        <option value="$PROJECT_DIR$/ast_decl.h" />
       </list>
     </option>
   </component>
@@ -345,12 +410,12 @@
       <workItem from="1482214894886" duration="2999000" />
       <workItem from="1482328405959" duration="2384000" />
       <workItem from="1482399803600" duration="4949000" />
-      <workItem from="1482410313727" duration="16207000" />
+      <workItem from="1482410313727" duration="18801000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="45721000" />
+    <option name="totallyTimeSpent" value="48315000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="879" y="0" width="1033" height="1044" extended-state="4" />
@@ -675,40 +740,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mips.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="353">
-          <caret line="623" column="3" lean-forward="false" selection-start-line="623" selection-start-column="3" selection-end-line="623" selection-end-column="3" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mips.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="443">
-          <caret line="43" column="57" lean-forward="false" selection-start-line="43" selection-start-column="57" selection-end-line="43" selection-end-column="57" />
-          <folding>
-            <element signature="e#33#49#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/codegen.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="965">
-          <caret line="206" column="38" lean-forward="false" selection-start-line="206" selection-start-column="38" selection-end-line="206" selection-end-column="38" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/codegen.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="32" column="28" lean-forward="false" selection-start-line="32" selection-start-column="21" selection-end-line="32" selection-end-column="28" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ast_type.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="770">
@@ -729,50 +760,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="455">
           <caret line="67" column="27" lean-forward="false" selection-start-line="67" selection-start-column="15" selection-end-line="67" selection-end-column="27" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ast_decl.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="825">
-          <caret line="109" column="13" lean-forward="true" selection-start-line="109" selection-start-column="4" selection-end-line="109" selection-end-column="13" />
-          <folding>
-            <element signature="e#296#312#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tac.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="103" column="22" lean-forward="false" selection-start-line="103" selection-start-column="10" selection-end-line="103" selection-end-column="22" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ast_decl.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="591">
-          <caret line="436" column="60" lean-forward="false" selection-start-line="436" selection-start-column="60" selection-end-line="436" selection-end-column="60" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ast_stmt.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="533">
-          <caret line="174" column="48" lean-forward="false" selection-start-line="174" selection-start-column="48" selection-end-line="174" selection-end-column="48" />
-          <folding>
-            <element signature="e#433#449#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/ast_stmt.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="863">
-          <caret line="536" column="0" lean-forward="true" selection-start-line="536" selection-start-column="0" selection-end-line="536" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -817,10 +804,84 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/codegen.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="48" column="1" lean-forward="false" selection-start-line="48" selection-start-column="1" selection-end-line="48" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mips.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-295">
+          <caret line="14" column="22" lean-forward="false" selection-start-line="14" selection-start-column="22" selection-end-line="14" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mips.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="324">
+          <caret line="143" column="17" lean-forward="false" selection-start-line="143" selection-start-column="17" selection-end-line="143" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ast_decl.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="365">
+          <caret line="56" column="27" lean-forward="false" selection-start-line="56" selection-start-column="27" selection-end-line="56" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/ast.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="773">
-          <caret line="80" column="46" lean-forward="true" selection-start-line="80" selection-start-column="46" selection-end-line="80" selection-end-column="46" />
+        <state relative-caret-position="953">
+          <caret line="80" column="46" lean-forward="false" selection-start-line="80" selection-start-column="46" selection-end-line="80" selection-end-column="46" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tac.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3075">
+          <caret line="205" column="45" lean-forward="false" selection-start-line="205" selection-start-column="45" selection-end-line="205" selection-end-column="45" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ast_decl.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4560">
+          <caret line="304" column="5" lean-forward="false" selection-start-line="304" selection-start-column="5" selection-end-line="304" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/codegen.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2235">
+          <caret line="149" column="30" lean-forward="false" selection-start-line="149" selection-start-column="29" selection-end-line="149" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ast_stmt.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="297">
+          <caret line="40" column="28" lean-forward="false" selection-start-line="40" selection-start-column="26" selection-end-line="40" selection-end-column="28" />
+          <folding>
+            <element signature="e#433#449#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ast_stmt.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="297">
+          <caret line="198" column="35" lean-forward="false" selection-start-line="198" selection-start-column="33" selection-end-line="198" selection-end-column="35" />
           <folding />
         </state>
       </provider>

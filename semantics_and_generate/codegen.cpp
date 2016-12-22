@@ -14,7 +14,7 @@ CodeGenerator::CodeGenerator()
 
 char *CodeGenerator::NewLabel()
 {
-    static labelNum = 0;
+    static int labelNum = 0;
     char temp[10];
     sprintf(temp, "_L%d", labelNum++);
     return strdup(temp);
@@ -41,10 +41,10 @@ Location* CodeGenerator::GenVar(Segment segment, int localOffset, const char *na
     return result;
 }
 
-Location* CodeGenerator::GenLoadConstant(const char *str, int localOffset)
+Location *CodeGenerator::GenLoadConstant(const char *s, int localOffset)
 {
     Location *result = GenVar(fpRelative, localOffset);
-    code->Append(new LoadConstant(result, str));
+    code->Append(new LoadStringConstant(result, s));
     return result;
 }
 

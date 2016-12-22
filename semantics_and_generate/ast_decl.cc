@@ -6,13 +6,14 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <iostream>
 #include <typeinfo>
 
 #include "ast_decl.h"
 #include "ast_type.h"
 #include "ast_stmt.h"
-#include "errors.h"
 #include "codegen.h"
+#include "errors.h"
 #include "tac.h"
 
 using std::cout;
@@ -46,22 +47,23 @@ void VarDecl::CheckDeclError() {
     this->type->CheckTypeError();
 }
 
-Location* VarDecl::Emit()
-{
-    FnDecl *fnDecl = this->GetEnclosFunc(this);
-    ClassDecl* classDecl = this->GetEnclosClass(this);
+Location *VarDecl::Emit() {
+    FnDecl *fndecl = this->GetEnclosFunc(this);
+    ClassDecl *classdecl = this->GetEnclosClass(this);
     int localOffset = 0;
-    const char* name = this->GetID()->GetName();
+    const char *name = this->GetID()->GetName();
 
-    if (fnDecl) //if it is a local variable
+    if (fndecl) // local variable
     {
-        localOffset = fnDecl->UpdateFrame();
+        localOffset = fndecl->UpdateFrame();
         this->id->SetMemLoc(Program::cg->GenVar(fpRelative, localOffset, name));
-    } else
+    }
+    else // global variable
     {
         this->id->SetMemLoc(Program::cg->GenVar(gpRelative, Program::offset, name));
         Program::offset = Program::offset + CodeGenerator::VarSize;
     }
+
     return NULL;
 }
 
@@ -301,7 +303,6 @@ Location *ClassDecl::Emit() {
         for (int i = 0; i < this->members->NumElements(); i++)
             this->members->Nth(i)->Emit();
     }
-
     Program::cg->GenVTable(this->id->GetName(), this->methodlabels);
 
     return NULL;

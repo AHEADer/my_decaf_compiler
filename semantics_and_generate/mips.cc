@@ -123,25 +123,14 @@ void Mips::SpillRegister(Register reg)
 
 void Mips::SpillAllDirtyRegisters()
 {
-	Register i;
-	for (int i = zero; i < NumRegs; i = (Register)(i+1))
-	{
-		if (regs[i].var && regs[i].isDirty)
-		{
-			break;
-		}
-	}
-
-	if (i!= NumRegs) //none are dirty
-	{
-		Emit("# (save modified registers before flow of control change)");
-	}
-	for (int i = zero; i < NumRegs; i = (Register)(i+1))
-	{
-		SpillRegister(i);
-	}
+    Register i;
+    for (i = zero; i < NumRegs; i = Register(i+1))
+        if (regs[i].var && regs[i].isDirty) break;
+    if (i != NumRegs) // none are dirty, don't print message to avoid confusion
+        Emit("# (save modified registers before flow of control change)");
+    for (i = zero; i < NumRegs; i = Register(i+1))
+        SpillRegister(i);
 }
-
 /* Method: SpillForEndFunction
  * ---------------------------
  * Slight optimization on the above method used when spilling for
@@ -152,7 +141,7 @@ void Mips::SpillAllDirtyRegisters()
  */
 void Mips::SpillForEndFunction()
 {
-	for (int i = zero; i < NumRegs; i = (Register)(i+1))
+	for (Register i = zero; i < NumRegs; i = (Register)(i+1))
 	{
 		if (regs[i].isGeneralPurpose && regs[i].var)
 		{
@@ -363,9 +352,9 @@ void Mips::EmitBeginFunction(int frameSize)
     Emit("sw $fp, 8($sp)\t# save fp");
     Emit("sw $ra, 4($sp)\t# save ra");
     Emit("addiu $fp, $sp, 8\t# set up new fp");
-    if (stackFrameSize != 0)
+    if (frameSize != 0)
         Emit("subu $sp, $sp, %d\t# decrement sp to make space for locals/temps",
-             stackFrameSize);
+             frameSize);
 }
 
 void Mips::EmitEndFunction()
@@ -599,16 +588,6 @@ void Mips::EmitData()
     Emit("\n");
 }
 
-void Mips::EmitData()
-{
-    Emit(".data");
-    Emit("%s:", "TRUE");
-    Emit(".asciiz \"true\"");
-    Emit("%s:", "FALSE");
-    Emit(".asciiz \"false\"");
-    Emit("\n");
-}
-
 const char* Mips::NameForTac(BinaryOp::OpCode code)
 {
     Assert(code >=0 && code < BinaryOp::NumOps);
@@ -668,4 +647,4 @@ Mips::Mips() {
 }
 
 
-const char *Mips::mipsName[BinaryOp::NumOps]
+const char *Mips::mipsName[BinaryOp::NumOps];

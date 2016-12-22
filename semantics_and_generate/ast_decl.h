@@ -4,55 +4,62 @@
  * manage declarations. There are 4 subclasses of the base class,
  * specialized for declarations of variables, functions, classes,
  * and interfaces.
+ *
+ * pp4: You will need to extend the Decl classes to implement
+ * code generation for declarations.
  */
 
 #ifndef _H_ast_decl
 #define _H_ast_decl
 
+#include <string>
+
 #include "ast.h"
 #include "ast_type.h"
 #include "hashtable.h"
 #include "list.h"
-#include "tac.h"
+
+using std::string;
 
 class Identifier;
 class StmtBlock;
 
+class BeginFunc;
+class Location;
 
-class Decl : public Node 
+class Decl : public Node
 {
- protected:
-  Identifier *id;
-  
-public:
-	Decl(Identifier *name);
-  	Identifier *GetID() { return id; }
-  	friend ostream& operator<<(ostream &out, Decl *decl) { if (decl) return out << decl->id;
-		else return out; }
-  	virtual const char *GetTypeName() { return NULL; }
-  	virtual Type *GetType() { return NULL; }
+protected:
+    Identifier *id;
 
-	virtual void SetLabels() {}
+public:
+    Decl(Identifier *name);
+    Identifier *GetID() { return id; }
+    friend ostream& operator<<(ostream &out, Decl *decl) { if (decl) return out << decl->id; else return out; }
+    virtual const char *GetTypeName() { return NULL; }
+    virtual Type *GetType() { return NULL; }
+
+    virtual void SetLabels() {}
 };
 
-class VarDecl : public Decl 
+class VarDecl : public Decl
 {
- protected:
-  Type *type;
-    
+protected:
+    Type *type;
+
+
 public:
     VarDecl(Identifier *name, Type *type);
     Type *GetType() { return type; }
     const char *GetTypeName() { if (type) return type->GetTypeName(); else return NULL; }
     bool HasSameTypeSig(VarDecl *vd);
-    void CheckStatements();
     void CheckDeclError();
+    void CheckStatements();
     Location *Emit();
-
 };
 
 
-class ClassDecl : public Decl 
+class ClassDecl : public Decl
 {
 protected:
     List<Decl*> *members;
@@ -60,14 +67,14 @@ protected:
     List<NamedType*> *implements;
     Hashtable<Decl*> *sym_table;
 
-    List<const char*>* methodlabels;
-    List<const char*>* fieldlabels;
+    List<const char *> *methodlabels;
+    List<const char *> *fieldlabels;
     int instanceOffset;
-
 
 public:
     ClassDecl(Identifier *name, NamedType *extends,
               List<NamedType*> *implements, List<Decl*> *members);
+    List<Decl*> *GetMembers() { return members; }
     NamedType *GetExtends() { return extends; }
     List<NamedType*> *GetImplements() { return implements; }
     void CheckStatements();
@@ -78,28 +85,26 @@ public:
     List<const char *> *GetMethodLabels() { return methodlabels; }
     List<const char *> *GetFieldLabels() { return fieldlabels; }
     void SetLabels();
-    Location* Emit();
+    Location *Emit();
     int UpdateInstanceOffset();
     int GetInstanceOffset();
 };
 
-
-//not implement in the tac generation
-class InterfaceDecl : public Decl 
+class InterfaceDecl : public Decl
 {
- protected:
-  List<Decl*> *members;
-  Hashtable<Decl*> *sym_table;
+protected:
+    List<Decl*> *members;
+    Hashtable<Decl*> *sym_table;
 
- public:
-  InterfaceDecl(Identifier *name, List<Decl*> *members);
-  void CheckDeclError();
-  List<Decl*> *GetMembers() { return members; }
-  Hashtable<Decl*> *GetSymTable() { return sym_table; }
+public:
+    InterfaceDecl(Identifier *name, List<Decl*> *members);
+    void CheckDeclError();
+    List<Decl*> *GetMembers() { return members; }
+    Hashtable<Decl*> *GetSymTable() { return sym_table; }
 
 };
 
-class FnDecl : public Decl 
+class FnDecl : public Decl
 {
 protected:
     List<VarDecl*> *formals;
@@ -107,12 +112,12 @@ protected:
     StmtBlock *body;
     Hashtable<Decl*> *sym_table;
 
-    BeginFunc* beginFunc;
+    BeginFunc *beginFunc;
     int frameSize;
     int localOffset;
     int paramOffset;
     string label;
-    
+
 public:
     FnDecl(Identifier *name, Type *returnType, List<VarDecl*> *formals);
     void SetFunctionBody(StmtBlock *b);
@@ -130,7 +135,6 @@ public:
     const char *GetLabel() { return label.c_str(); }
     int UpdateFrame(); // update frame and localOffset by Codegenrator::VarSize, return the previous localOffset
     void SetLabels();
-
 };
 
 
