@@ -22,9 +22,45 @@ Node::Node() {
   this->location = NULL;
   this->parent = NULL;
 }
+
+FnDecl *Node::GetEnclosFunc(Node *node) {
+  Node *parent = node->GetParent();
+  FnDecl *fndecl = NULL;
+
+  while (parent)
+    {
+      if (typeid(*parent) == typeid(FnDecl))
+        {
+          fndecl = dynamic_cast<FnDecl*>(parent);
+          break;
+        }
+      parent = parent->GetParent();
+    }
+
+  return fndecl;
+}
 	 
+ClassDecl *Node::GetEnclosClass(Node *node) {
+  Node *parent = node->GetParent();
+  ClassDecl *classdecl = NULL;
+
+  while(parent)
+    {
+      if (typeid(*parent) == typeid(ClassDecl))
+        {
+          classdecl = dynamic_cast<ClassDecl*>(parent);
+          break;
+        }
+      parent = parent->GetParent();
+    }
+
+  return classdecl;
+}
+
 Identifier::Identifier(yyltype loc, const char *n) : Node(loc) {
   this->name = strdup(n);
+
+  this->memLoc = NULL;
 }
 
 // look for declaration from inner most scope to global scope
@@ -54,39 +90,4 @@ Decl *Identifier::CheckIdDecl(Hashtable<Decl*> *sym_table, const char *name)
   if (sym_table)
     decl = sym_table->Lookup(name);
   return decl;
-}
-
-
-FnDecl *Node::GetEnclosFunc(Node *node) {
-  Node *parent = node->GetParent();
-  FnDecl *fndecl = NULL;
-
-  while (parent)
-  {
-    if (typeid(*parent) == typeid(FnDecl))
-    {
-      fndecl = dynamic_cast<FnDecl*>(parent);
-      break;
-    }
-    parent = parent->GetParent();
-  }
-
-  return fndecl;
-}
-
-ClassDecl *Node::GetEnclosClass(Node *node) {
-  Node *parent = node->GetParent();
-  ClassDecl *classdecl = NULL;
-
-  while(parent)
-  {
-    if (typeid(*parent) == typeid(ClassDecl))
-    {
-      classdecl = dynamic_cast<ClassDecl*>(parent);
-      break;
-    }
-    parent = parent->GetParent();
-  }
-
-  return classdecl;
 }

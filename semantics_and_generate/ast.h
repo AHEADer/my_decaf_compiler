@@ -45,47 +45,47 @@ class ClassDecl;
 class Location;
 
 class Node  {
-protected:
-    yyltype *location;
-    Node *parent;
+ protected:
+  yyltype *location;
+  Node *parent;
 
-public:
-    Node(yyltype loc);
-    Node();
-    virtual ~Node() {}
+ public:
+  Node(yyltype loc);
+  Node();
+  virtual ~Node() {}
+    
+  yyltype *GetLocation()   { return location; }
+  void SetParent(Node *p)  { parent = p; }
+  Node *GetParent()        { return parent; }
 
-    yyltype *GetLocation()   { return location; }
-    void SetParent(Node *p)  { parent = p; }
-    Node *GetParent()        { return parent; }
+  virtual Hashtable<Decl*> *GetSymTable() { return NULL; }
 
-    virtual Hashtable<Decl*> *GetSymTable() { return NULL; }
+  virtual void CheckDeclError() {}
+  virtual void CheckStatements() {}
+  virtual Location *Emit() { return NULL; }
 
-    virtual void CheckDeclError() {}
-    virtual void CheckStatements() {}
-    virtual Location *Emit() { return NULL; }
-
-    // get enclosing function to backpatch the frame size
-    FnDecl *GetEnclosFunc(Node *node);
-    // for methods
-    ClassDecl *GetEnclosClass(Node *node);
+  // get enclosing function to backpatch the frame size
+  FnDecl *GetEnclosFunc(Node *node);
+  // for methods
+  ClassDecl *GetEnclosClass(Node *node);
 };
+   
 
-
-class Identifier : public Node
+class Identifier : public Node 
 {
-protected:
-    char *name;
-    Location *memLoc;
+ protected:
+  char *name;
+  Location *memLoc;
 
-public:
-    Identifier(yyltype loc, const char *name);
-    const char *GetName() { return name; }
-    Decl *CheckIdDecl();
-    Decl *CheckIdDecl(Hashtable<Decl*> *sym_table, const char *name);
-    friend ostream& operator<<(ostream& out, Identifier *id) { if (id) return out << id->name; else return out;}
+ public:
+  Identifier(yyltype loc, const char *name);
+  const char *GetName() { return name; }
+  Decl *CheckIdDecl();
+  Decl *CheckIdDecl(Hashtable<Decl*> *sym_table, const char *name);
+  friend ostream& operator<<(ostream& out, Identifier *id) { if (id) return out << id->name; else return out;}
 
-    Location *GetMemLoc() { return memLoc; }
-    void SetMemLoc(Location *loc) { memLoc = loc; }
+  Location *GetMemLoc() { return memLoc; }
+  void SetMemLoc(Location *loc) { memLoc = loc; }
 };
 
 
@@ -96,8 +96,8 @@ public:
 // when your parser can continue after an error.
 class Error : public Node
 {
-public:
-    Error() : Node() {}
+ public:
+ Error() : Node() {}
 };
 
 #endif
